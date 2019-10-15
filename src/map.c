@@ -29,7 +29,7 @@ MapNode *map_get(Map *map, const char *key)
     return node;
 }
 
-char *map_get_value(Map *map, const char *key)
+void *map_get_value(Map *map, const char *key)
 {
     MapNode *node = map_get(map, key);
 
@@ -41,7 +41,17 @@ char *map_get_value(Map *map, const char *key)
     return NULL;
 }
 
-void map_set(Map *map, const char *key, const char *value)
+char *map_get_string(Map *map, const char *key)
+{
+    return (char *)map_get_value(map, key);
+}
+
+int *map_get_int(Map *map, const char *key)
+{
+    return (int *)map_get_value(map, key);
+}
+
+void map_set(Map *map, const char *key, const void *value, size_t size)
 {
     MapNode *node = map_get(map, key);
 
@@ -63,8 +73,21 @@ void map_set(Map *map, const char *key, const char *value)
         free(node->value);
     }
 
-    node->value = calloc(sizeof(char), strlen(value) + 1);
-    strcpy(node->value, value);
+    node->value = calloc(sizeof(void), size);
+    memcpy(node->value, value, size);
+}
+
+void map_set_string(Map *map, const char *key, const char *value)
+{
+    map_set(map, key, value, sizeof(char) * (strlen(value) + 1));
+}
+
+void map_set_int(Map *map, const char *key, int value)
+{
+    int *ptr = malloc(sizeof(int));
+    *ptr = value;
+
+    map_set(map, key, ptr, sizeof(int));
 }
 
 void map_remove(Map *map, const char *key)

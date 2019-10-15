@@ -7,6 +7,7 @@ fi
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
     apt-get install libcurl4-openssl-dev
+    apt-get install cmake
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     # brew install curl-openssl
 fi

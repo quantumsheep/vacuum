@@ -84,10 +84,7 @@ void map_set_string(Map *map, const char *key, const char *value)
 
 void map_set_int(Map *map, const char *key, int value)
 {
-    int *ptr = malloc(sizeof(int));
-    *ptr = value;
-
-    map_set(map, key, ptr, sizeof(int));
+    map_set(map, key, &value, sizeof(int));
 }
 
 void map_remove(Map *map, const char *key)

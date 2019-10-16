@@ -52,6 +52,9 @@ struct config_token_item_t
     int line;
 };
 
+ConfigAction *config_action_init(const char *url, Map *options);
+ConfigTask *config_task_init(int hours, int minutes, int seconds, Vector *actions);
+
 Config config_load(const char *path);
 Config config_parse(Vector *tokens);
 

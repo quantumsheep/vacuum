@@ -35,7 +35,7 @@ int *vector_get_int(Vector *vec, unsigned int index)
     return (int *)vector_get(vec, index);
 }
 
-unsigned int vector_push(Vector *vec, const void *value, size_t size)
+unsigned int vector_push_ref(Vector *vec, void *ptr)
 {
     if (vec->length == vec->capacity)
     {
@@ -44,10 +44,17 @@ unsigned int vector_push(Vector *vec, const void *value, size_t size)
         memset(vec->values + vec->length, 0, vec->length);
     }
 
-    vec->values[vec->length] = calloc(sizeof(void), size);
-    memcpy(vec->values[vec->length], value, size);
+    vec->values[vec->length] = ptr;
 
     return vec->length++;
+}
+
+unsigned int vector_push(Vector *vec, const void *value, size_t size)
+{
+    void *ptr = calloc(sizeof(void), size);
+    memcpy(ptr, value, size);
+
+    return vector_push_ref(vec, ptr);
 }
 
 unsigned int vector_push_string(Vector *vec, const char *value)

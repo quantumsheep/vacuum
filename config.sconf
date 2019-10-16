@@ -1,18 +1,18 @@
-==
+=
 {name -> Test Crawl}
 {url -> https://google.fr}
 +
 {option1 -> value1}
 {option2 -> value2}
 
-==
+=
 {name -> Test Crawl 2}
 {url -> https://myges.fr}
 +
 {max-depth -> 5}
 
-=
+==
 {name -> Test Task}
 {second -> 10}
 +
-(Test Crawl, )
+(Test Crawl)

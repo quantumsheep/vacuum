@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 #include "map.h"
+#include "vector.h"
 
 typedef struct config_action_t ConfigAction;
 struct config_action_t
@@ -18,7 +19,7 @@ struct config_task_t
     int minutes;
     int seconds;
 
-    ConfigAction **actions;
+    Vector *actions;
 };
 
 typedef struct config_t Config;
@@ -28,6 +29,33 @@ struct config_t
     Map *tasks;
 };
 
-Map *config_parse(const char *path);
+typedef enum config_token_type_t ConfigTokenType;
+enum config_token_type_t
+{
+    TOKEN_ACTION,          // =
+    TOKEN_TASK,            // ==
+    TOKEN_ARRAY_SEPARATOR, // ,
+    TOKEN_OPENING_ARRAY,   // (
+    TOKEN_CLOSING_ARRAY,   // )
+    TOKEN_OPENING_OPTION,  // {
+    TOKEN_CLOSING_OPTION,  // }
+    TOKEN_OPTION_ARROW,    // ->
+    TOKEN_SEPARATOR,       // +
+    TOKEN_STRING,          // any string
+};
+
+typedef struct config_token_item_t ConfigToken;
+struct config_token_item_t
+{
+    ConfigTokenType type;
+    char *value;
+    int line;
+};
+
+Config config_load(const char *path);
+Config config_parse(Vector *tokens);
+
+ConfigToken *config_create_token(ConfigTokenType type, char *value, int line, int copy_has_ref);
+Vector *config_tokenize(const char *path);
 
 #endif

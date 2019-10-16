@@ -64,7 +64,11 @@ void map_set(Map *map, const char *key, const void *value, size_t size)
         node->next = map->first;
         node->prev = NULL;
 
-        map->first->prev = node;
+        if (map->first != NULL)
+        {
+            map->first->prev = node;
+        }
+
         map->first = node;
     }
     else if (node->value != NULL)

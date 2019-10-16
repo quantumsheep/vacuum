@@ -97,7 +97,7 @@ void map_set_int(Map *map, const char *key, int value)
     map_set(map, key, &value, sizeof(int));
 }
 
-void map_remove(Map *map, const char *key)
+void map_remove(Map *map, const char *key, MapDeleteMode mode)
 {
     MapNode *node = map_get(map, key);
 
@@ -122,7 +122,7 @@ void map_remove(Map *map, const char *key)
             free(node->key);
         }
 
-        if (node->value != NULL)
+        if (mode == MAP_FREE_REFERENCE && node->value != NULL)
         {
             free(node->value);
         }

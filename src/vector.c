@@ -5,11 +5,11 @@
 
 Vector *vector_init()
 {
-    Vector *vec = malloc(sizeof(Vector));
+    Vector *vec = (Vector *)malloc(sizeof(Vector));
     vec->capacity = 32;
     vec->length = 0;
 
-    vec->values = malloc(sizeof(void *) * vec->capacity);
+    vec->values = (void **)malloc(sizeof(void *) * vec->capacity);
     memset(vec->values, 0, vec->capacity);
 
     return vec;
@@ -51,7 +51,7 @@ unsigned int vector_push_ref(Vector *vec, void *ptr)
 
 unsigned int vector_push(Vector *vec, const void *value, size_t size)
 {
-    void *ptr = calloc(sizeof(void), size);
+    void *ptr = (void *)calloc(sizeof(void), size);
     memcpy(ptr, value, size);
 
     return vector_push_ref(vec, ptr);

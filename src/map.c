@@ -4,7 +4,7 @@
 
 Map *map_init()
 {
-    Map *map = malloc(sizeof(Map));
+    Map *map = (Map *)malloc(sizeof(Map));
 
     map->first = NULL;
 
@@ -56,9 +56,9 @@ void map_set_ref(Map *map, const char *key, void *ptr)
 
     if (node == NULL)
     {
-        node = malloc(sizeof(MapNode));
+        node = (MapNode *)malloc(sizeof(MapNode));
 
-        node->key = calloc(sizeof(char), strlen(key) + 1);
+        node->key = (char *)calloc(sizeof(char), strlen(key) + 1);
         strcpy(node->key, key);
 
         node->next = map->first;
@@ -81,7 +81,7 @@ void map_set_ref(Map *map, const char *key, void *ptr)
 
 void map_set(Map *map, const char *key, const void *value, size_t size)
 {
-    void *ptr = calloc(sizeof(void), size);
+    void *ptr = (void *)calloc(sizeof(void), size);
     memcpy(ptr, value, size);
 
     return map_set_ref(map, key, ptr);

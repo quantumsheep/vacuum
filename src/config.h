@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "map.h"
+
 typedef struct config_action_t ConfigAction;
 struct config_action_t
 {

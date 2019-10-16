@@ -1,5 +1,4 @@
 #include "config.h"
-#include "map.h"
 
 Map *config_parse(const char *path)
 {

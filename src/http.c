@@ -21,7 +21,7 @@ static struct buffer_t init_buffer()
     return buffer;
 }
 
-size_t write_buffer(void *ptr, size_t size, size_t nmemb, struct buffer_t *buffer)
+static size_t write_buffer(void *ptr, size_t size, size_t nmemb, struct buffer_t *buffer)
 {
     size_t nbytes = size * nmemb;
 

@@ -50,7 +50,7 @@ int *map_get_int(Map *map, const char *key)
     return (int *)map_get_value(map, key);
 }
 
-void map_set(Map *map, const char *key, const void *value, size_t size)
+void map_set_ref(Map *map, const char *key, void *ptr)
 {
     MapNode *node = map_get(map, key);
 
@@ -76,8 +76,15 @@ void map_set(Map *map, const char *key, const void *value, size_t size)
         free(node->value);
     }
 
-    node->value = calloc(sizeof(void), size);
-    memcpy(node->value, value, size);
+    node->value = ptr;
+}
+
+void map_set(Map *map, const char *key, const void *value, size_t size)
+{
+    void *ptr = calloc(sizeof(void), size);
+    memcpy(ptr, value, size);
+
+    return map_set_ref(map, key, ptr);
 }
 
 void map_set_string(Map *map, const char *key, const char *value)

@@ -112,7 +112,7 @@ Vector *config_tokenize(const char *path)
         }
         else if (*cursor != ' ' && *cursor != '\r')
         {
-            printf("Undefined token: '%c'\n", *cursor);
+            printf("Invalid token '%c' on line %d.\n", *cursor, line);
         }
     }
 

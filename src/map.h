@@ -1,6 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <stdlib.h>
+
 typedef struct map_node_t MapNode;
 struct map_node_t
 {

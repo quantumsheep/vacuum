@@ -9,10 +9,16 @@ struct vector_t
     size_t length;
     size_t capacity;
 
-    char **values;
+    void **values;
 };
 
 Vector *vector_init();
-int vector_push(Vector *vec, const char *value);
+void *vector_get(Vector *vec, unsigned int index);
+char *vector_get_string(Vector *vec, unsigned int index);
+int *vector_get_int(Vector *vec, unsigned int index);
+
+unsigned int vector_push(Vector *vec, const void *value, size_t size);
+unsigned int vector_push_string(Vector *vec, const char *value);
+unsigned int vector_push_int(Vector *vec, int value);
 
 #endif

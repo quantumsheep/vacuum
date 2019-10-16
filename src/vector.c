@@ -1,26 +1,79 @@
 #include "vector.h"
 
+#include <string.h>
+#include <stdlib.h>
+
 Vector *vector_init()
 {
     Vector *vec = malloc(sizeof(Vector));
     vec->capacity = 32;
     vec->length = 0;
 
-    vec->values = malloc(sizeof(char *) * vec->capacity);
+    vec->values = malloc(sizeof(void *) * vec->capacity);
+    memset(vec->values, 0, vec->capacity);
 
     return vec;
 }
 
-int vector_push(Vector *vec, const char *value)
+void *vector_get(Vector *vec, unsigned int index)
+{
+    if (index < vec->length)
+    {
+        return vec->values[index];
+    }
+
+    return NULL;
+}
+
+char *vector_get_string(Vector *vec, unsigned int index)
+{
+    return (char *)vector_get(vec, index);
+}
+
+int *vector_get_int(Vector *vec, unsigned int index)
+{
+    return (int *)vector_get(vec, index);
+}
+
+unsigned int vector_push(Vector *vec, const void *value, size_t size)
 {
     if (vec->length == vec->capacity)
     {
         vec->capacity *= 2;
-        vec->values = realloc(vec->values, sizeof(char *) * vec->capacity);
+        vec->values = realloc(vec->values, sizeof(void *) * vec->capacity);
+        memset(vec->values + vec->length, 0, vec->length);
     }
 
-    vec->values[vec->length] = calloc(sizeof(char), strlen(value) + 1);
-    strcpy(vec->values[vec->length], value);
+    vec->values[vec->length] = calloc(sizeof(void), size);
+    memcpy(vec->values[vec->length], value, size);
 
-    vec->length++;
+    return vec->length++;
+}
+
+unsigned int vector_push_string(Vector *vec, const char *value)
+{
+    return vector_push(vec, value, sizeof(char) * (strlen(value) + 1));
+}
+
+unsigned int vector_push_int(Vector *vec, int value)
+{
+    return vector_push(vec, &value, sizeof(int));
+}
+
+void vector_remove(Vector *vec, unsigned int index)
+{
+    if (index < vec->length)
+    {
+        if (vec->values[index] != NULL)
+        {
+            free(vec->values[index]);
+        }
+
+        for (int i = index; i < (vec->length - 1); i++)
+        {
+            vec->values[i] = vec->values[i + 1];
+        }
+
+        vec->values[--vec->length] = NULL;
+    }
 }

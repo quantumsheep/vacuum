@@ -67,11 +67,11 @@ unsigned int vector_push_int(Vector *vec, int value)
     return vector_push(vec, &value, sizeof(int));
 }
 
-void vector_remove(Vector *vec, unsigned int index)
+void vector_remove(Vector *vec, unsigned int index, VectorDeleteMode mode)
 {
     if (index < vec->length)
     {
-        if (vec->values[index] != NULL)
+        if (mode == VECTOR_FREE_REFERENCE && vec->values[index] != NULL)
         {
             free(vec->values[index]);
         }

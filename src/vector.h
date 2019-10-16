@@ -22,4 +22,13 @@ unsigned int vector_push(Vector *vec, const void *value, size_t size);
 unsigned int vector_push_string(Vector *vec, const char *value);
 unsigned int vector_push_int(Vector *vec, int value);
 
+typedef enum vector_delete_mode_t VectorDeleteMode;
+enum vector_delete_mode_t
+{
+    VECTOR_KEEP_REFERENCE,
+    VECTOR_FREE_REFERENCE,
+};
+
+void vector_remove(Vector *vec, unsigned int index, VectorDeleteMode mode);
+
 #endif

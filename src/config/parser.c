@@ -89,6 +89,102 @@ static Vector *parse_array(Vector *tokens, int *index)
     return array;
 }
 
+static int parse_action(Map *actions, Vector *tokens, int *index)
+{
+    int i = *index;
+    ConfigToken *token = (ConfigToken *)vector_get(tokens, i);
+
+    i++;
+
+    Map *properties = parse_options(tokens, &i);
+    Map *options = NULL;
+
+    ConfigToken *next = (ConfigToken *)vector_get(tokens, i);
+
+    if (next && next->type == TOKEN_SEPARATOR)
+    {
+        i++;
+        options = parse_options(tokens, &i);
+    }
+
+    char *name = map_get_string(properties, "name");
+    char *url = map_get_string(properties, "url");
+
+    if (name == NULL)
+    {
+        printf("Missing 'name' property for action line %d.\n", token->line);
+    }
+    else if (url == NULL)
+    {
+        printf("Missing 'url' property for action line %d.\n", token->line);
+    }
+    else
+    {
+        map_set_ref(actions, name, config_action_init(url, options));
+    }
+
+    *index = i;
+}
+
+static int parse_task(Map *tasks, Vector *tokens, int *index)
+{
+    int i = *index;
+    ConfigToken *token = (ConfigToken *)vector_get(tokens, i);
+
+    i++;
+
+    Map *properties = parse_options(tokens, &i);
+    Vector *actions = NULL;
+
+    ConfigToken *next = (ConfigToken *)vector_get(tokens, i);
+
+    if (next && next->type == TOKEN_SEPARATOR)
+    {
+        i++;
+        actions = parse_array(tokens, &i);
+    }
+
+    char *name = map_get_string(properties, "name");
+    char *hours = map_get_string(properties, "hour");
+    char *minutes = map_get_string(properties, "minute");
+    char *seconds = map_get_string(properties, "second");
+
+    if (name == NULL)
+    {
+        printf("Missing 'name' property for task line %d.\n", token->line);
+    }
+    else if (hours == NULL && minutes == NULL && seconds == NULL)
+    {
+        printf("Missing time property for task line %d. 'hour', 'minute' and/or 'second' properties required.\n", token->line);
+    }
+    else
+    {
+        int hours_i = 0;
+        int minutes_i = 0;
+        int seconds_i = 0;
+
+        if (hours != NULL)
+        {
+            hours_i = atoi(hours);
+        }
+
+        if (minutes != NULL)
+        {
+            minutes_i = atoi(minutes);
+        }
+
+        if (seconds != NULL)
+        {
+            seconds_i = atoi(seconds);
+        }
+
+        map_set_ref(tasks, name, config_task_init(hours_i, minutes_i, seconds_i, actions));
+        map_free(properties, MAP_FREE_REFERENCE);
+    }
+
+    *index = i;
+}
+
 Config config_parse(Vector *tokens)
 {
     Config config;
@@ -105,87 +201,14 @@ Config config_parse(Vector *tokens)
             continue;
         }
 
-        if (token->type == TOKEN_ACTION || token->type == TOKEN_TASK)
+        if (token->type == TOKEN_ACTION)
         {
-            i++;
-
-            Map *properties = parse_options(tokens, &i);
-
-            ConfigToken *next = (ConfigToken *)vector_get(tokens, i);
-
-            if (token->type == TOKEN_ACTION)
-            {
-                Map *options = NULL;
-
-                if (next && next->type == TOKEN_SEPARATOR)
-                {
-                    i++;
-                    options = parse_options(tokens, &i);
-                }
-
-                char *name = map_get_string(properties, "name");
-                char *url = map_get_string(properties, "url");
-
-                if (name == NULL)
-                {
-                    printf("Missing 'name' property for action line %d.\n", token->line);
-                }
-                else if (url == NULL)
-                {
-                    printf("Missing 'url' property for action line %d.\n", token->line);
-                }
-                else
-                {
-                    map_set_ref(config.actions, name, config_action_init(url, options));
-                }
-            }
-            else if (token->type == TOKEN_TASK)
-            {
-                Vector *actions = NULL;
-                if (next && next->type == TOKEN_SEPARATOR)
-                {
-                    i++;
-                    actions = parse_array(tokens, &i);
-                }
-
-                char *name = map_get_string(properties, "name");
-                char *hours = map_get_string(properties, "hour");
-                char *minutes = map_get_string(properties, "minute");
-                char *seconds = map_get_string(properties, "second");
-
-                if (name == NULL)
-                {
-                    printf("Missing 'name' property for task line %d.\n", token->line);
-                }
-                else if (hours == NULL && minutes == NULL && seconds == NULL)
-                {
-                    printf("Missing time property for task line %d. 'hour', 'minute' and/or 'second' properties required.\n", token->line);
-                }
-                else
-                {
-                    int hours_i = 0;
-                    int minutes_i = 0;
-                    int seconds_i = 0;
-
-                    if (hours != NULL)
-                    {
-                        hours_i = atoi(hours);
-                    }
-
-                    if (minutes != NULL)
-                    {
-                        minutes_i = atoi(minutes);
-                    }
-
-                    if (seconds != NULL)
-                    {
-                        seconds_i = atoi(seconds);
-                    }
-
-                    map_set_ref(config.tasks, name, config_task_init(hours_i, minutes_i, seconds_i, actions));
-                }
-            }
-
+            parse_action(config.actions, tokens, &i);
+            i--;
+        }
+        else if (token->type == TOKEN_TASK)
+        {
+            parse_task(config.tasks, tokens, &i);
             i--;
         }
         else

@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-static Map *parse_options(Vector *tokens, int *index)
+static Map *parse_options(Vector *tokens, int *index, int *has_error)
 {
     Map *options = map_init();
     int i = *index;
@@ -19,21 +19,25 @@ static Map *parse_options(Vector *tokens, int *index)
         if (key == NULL || key->type != TOKEN_STRING)
         {
             printf("Missing key in option line %d\n", token->line);
+            *has_error = 1;
             break;
         }
         else if (arrow == NULL || arrow->type != TOKEN_OPTION_ARROW)
         {
             printf("Missing arrow in option line %d\n", token->type);
+            *has_error = 1;
             break;
         }
         else if (value == NULL || value->type != TOKEN_STRING)
         {
             printf("Missing value in option line %d\n", token->line);
+            *has_error = 1;
             break;
         }
         else if (end == NULL || end->type != TOKEN_CLOSING_OPTION)
         {
             printf("Missing '}' in option line %d\n", token->line);
+            *has_error = 1;
             break;
         }
 
@@ -46,7 +50,7 @@ static Map *parse_options(Vector *tokens, int *index)
     return options;
 }
 
-static Vector *parse_array(Vector *tokens, int *index)
+static Vector *parse_array(Vector *tokens, int *index, int *has_error)
 {
     Vector *array = vector_init();
     int i = *index;
@@ -56,6 +60,7 @@ static Vector *parse_array(Vector *tokens, int *index)
     if (token == NULL || token->type != TOKEN_OPENING_ARRAY)
     {
         printf("Missing '(' for listing actions line %d\n", token->line);
+        *has_error = 1;
     }
     else
     {
@@ -68,6 +73,7 @@ static Vector *parse_array(Vector *tokens, int *index)
             if (token == NULL || token->type != TOKEN_STRING)
             {
                 printf("Unexpected token '%s' on line %d - expected a string.\n", token->value, token->line);
+                *has_error = 1;
                 break;
             }
 
@@ -79,6 +85,7 @@ static Vector *parse_array(Vector *tokens, int *index)
             if (token && token->type != TOKEN_CLOSING_ARRAY && token->type != TOKEN_ARRAY_SEPARATOR)
             {
                 printf("Unexpected token '%s' on line %d - expected ',' or ')'.\n", token->value, token->line);
+                *has_error = 1;
                 break;
             }
         } while (token && token->type != TOKEN_CLOSING_ARRAY);
@@ -89,22 +96,28 @@ static Vector *parse_array(Vector *tokens, int *index)
     return array;
 }
 
-static int parse_action(Map *actions, Vector *tokens, int *index)
+static void parse_action(Map *actions, Vector *tokens, int *index, int *has_error)
 {
     int i = *index;
     ConfigToken *token = (ConfigToken *)vector_get(tokens, i);
 
     i++;
 
-    Map *properties = parse_options(tokens, &i);
+    Map *properties = parse_options(tokens, &i, has_error);
     Map *options = NULL;
+
+    if (*has_error)
+        return;
 
     ConfigToken *next = (ConfigToken *)vector_get(tokens, i);
 
     if (next && next->type == TOKEN_SEPARATOR)
     {
         i++;
-        options = parse_options(tokens, &i);
+        options = parse_options(tokens, &i, has_error);
+
+        if (*has_error)
+            return;
     }
 
     char *name = map_get_string(properties, "name");
@@ -113,10 +126,12 @@ static int parse_action(Map *actions, Vector *tokens, int *index)
     if (name == NULL)
     {
         printf("Missing 'name' property for action line %d.\n", token->line);
+        *has_error = 1;
     }
     else if (url == NULL)
     {
         printf("Missing 'url' property for action line %d.\n", token->line);
+        *has_error = 1;
     }
     else
     {
@@ -126,22 +141,28 @@ static int parse_action(Map *actions, Vector *tokens, int *index)
     *index = i;
 }
 
-static int parse_task(Map *tasks, Vector *tokens, int *index)
+static void parse_task(Map *tasks, Vector *tokens, int *index, int *has_error)
 {
     int i = *index;
     ConfigToken *token = (ConfigToken *)vector_get(tokens, i);
 
     i++;
 
-    Map *properties = parse_options(tokens, &i);
+    Map *properties = parse_options(tokens, &i, has_error);
     Vector *actions = NULL;
+
+    if (*has_error)
+        return;
 
     ConfigToken *next = (ConfigToken *)vector_get(tokens, i);
 
     if (next && next->type == TOKEN_SEPARATOR)
     {
         i++;
-        actions = parse_array(tokens, &i);
+        actions = parse_array(tokens, &i, has_error);
+
+        if (*has_error)
+            return;
     }
 
     char *name = map_get_string(properties, "name");
@@ -152,10 +173,12 @@ static int parse_task(Map *tasks, Vector *tokens, int *index)
     if (name == NULL)
     {
         printf("Missing 'name' property for task line %d.\n", token->line);
+        *has_error = 1;
     }
     else if (hours == NULL && minutes == NULL && seconds == NULL)
     {
         printf("Missing time property for task line %d. 'hour', 'minute' and/or 'second' properties required.\n", token->line);
+        *has_error = 1;
     }
     else
     {
@@ -185,7 +208,7 @@ static int parse_task(Map *tasks, Vector *tokens, int *index)
     *index = i;
 }
 
-Config config_parse(Vector *tokens)
+Config config_parse(Vector *tokens, int *has_error)
 {
     Config config;
 
@@ -203,18 +226,22 @@ Config config_parse(Vector *tokens)
 
         if (token->type == TOKEN_ACTION)
         {
-            parse_action(config.actions, tokens, &i);
+            parse_action(config.actions, tokens, &i, has_error);
             i--;
         }
         else if (token->type == TOKEN_TASK)
         {
-            parse_task(config.tasks, tokens, &i);
+            parse_task(config.tasks, tokens, &i, has_error);
             i--;
         }
         else
         {
             printf("Unexpected token '%s' on line %d - expected '==' or '='.\n", token->value, token->line);
+            *has_error = 1;
         }
+
+        if (*has_error)
+            break;
     }
 
     return config;

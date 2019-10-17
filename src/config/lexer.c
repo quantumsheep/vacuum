@@ -31,7 +31,7 @@ static int starts_with(const char *str, const char *pre)
     return len_str >= len_pre && memcmp(pre, str, len_pre) == 0;
 }
 
-Vector *config_tokenize(const char *path)
+Vector *config_tokenize(const char *path, int *has_error)
 {
     Vector *tokens = vector_init();
 
@@ -113,6 +113,8 @@ Vector *config_tokenize(const char *path)
         else if (*cursor != ' ' && *cursor != '\r')
         {
             printf("Invalid token '%c' on line %d.\n", *cursor, line);
+            *has_error = 1;
+            break;
         }
     }
 

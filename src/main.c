@@ -4,7 +4,14 @@
 
 int main()
 {
-    Config config = config_load("config.sconf");
+    int has_error = 0;
+    Config config = config_load("config.sconf", &has_error);
+
+    if (has_error)
+    {
+        return 1;
+    }
+
     crawl("https://qtmsheep.com");
 
     config_free(config);

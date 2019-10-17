@@ -1,8 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "map.h"
-#include "vector.h"
+#include "datatypes/map.h"
+#include "datatypes/vector.h"
 
 typedef struct config_action_t ConfigAction;
 struct config_action_t

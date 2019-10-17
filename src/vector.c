@@ -85,10 +85,23 @@ void vector_remove(Vector *vec, unsigned int index, VectorDeleteMode mode)
     }
 }
 
-void vector_free(Vector *vec)
+void vector_free(Vector *vec, int free_values)
 {
     if (vec == NULL)
         return;
+
+    if (free_values)
+    {
+        for (int i = 0; i < vec->length; i++)
+        {
+            void *value = vector_get(vec, i);
+
+            if (value != NULL)
+            {
+                free(value);
+            }
+        }
+    }
 
     free(vec->values);
     free(vec);

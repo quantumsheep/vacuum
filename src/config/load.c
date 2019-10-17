@@ -7,6 +7,8 @@ Config config_load(const char *path)
     Vector *tokens = config_tokenize(path);
     Config config = config_parse(tokens);
 
+    vector_free(tokens, VECTOR_FREE_REFERENCE);
+
     {
         MapNode *node = config.actions->first;
 

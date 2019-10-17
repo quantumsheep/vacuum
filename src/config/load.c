@@ -17,55 +17,34 @@ Config config_load(const char *path, int *has_error)
 
     if (!(*has_error))
     {
+        for (MapNode *node = config.actions->first; node != NULL; node = node->next)
         {
-            MapNode *node = config.actions->first;
+            ConfigAction *action = (ConfigAction *)node->value;
 
-            while (node)
+            printf("Action '%s':\n", node->key);
+            printf("  [url]: %s\n", action->url);
+            printf("  options:\n");
+
+            for (MapNode *option = action->options->first; option != NULL; option = option->next)
             {
-                printf("Action '%s':\n", node->key);
-
-                ConfigAction *action = (ConfigAction *)node->value;
-
-                printf("  [url]: %s\n", action->url);
-                printf("  options:\n");
-
-                MapNode *option = action->options->first;
-
-                while (option)
-                {
-                    char *value = (char *)option->value;
-
-                    printf("    [%s]: %s\n", option->key, value);
-
-                    option = option->next;
-                }
-
-                node = node->next;
+                printf("    [%s]: %s\n", option->key, (char *)option->value);
             }
         }
 
+        for (MapNode *node = config.tasks->first; node != NULL; node = node->next)
         {
-            MapNode *node = config.tasks->first;
+            ConfigTask *task = (ConfigTask *)node->value;
 
-            while (node)
+            printf("Task '%s':\n", node->key);
+            printf("  [hours]: %d\n", task->hours);
+            printf("  [minutes]: %d\n", task->minutes);
+            printf("  [seconds]: %d\n", task->seconds);
+            printf("  actions:\n");
+
+            for (int i = 0; i < task->actions->length; i++)
             {
-                printf("Task '%s':\n", node->key);
-
-                ConfigTask *task = (ConfigTask *)node->value;
-
-                printf("  [hours]: %d\n", task->hours);
-                printf("  [minutes]: %d\n", task->minutes);
-                printf("  [seconds]: %d\n", task->seconds);
-                printf("  actions:\n");
-
-                for (int i = 0; i < task->actions->length; i++)
-                {
-                    char *action = vector_get_string(task->actions, i);
-
-                    printf("    - '%s'\n", action);
-                }
-
-                node = node->next;
+                char *action = vector_get_string(task->actions, i);
+                printf("    - '%s'\n", action);
             }
         }
     }

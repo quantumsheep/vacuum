@@ -31,4 +31,6 @@ enum vector_delete_mode_t
 
 void vector_remove(Vector *vec, unsigned int index, VectorDeleteMode mode);
 
+void vector_free(Vector *vec);
+
 #endif

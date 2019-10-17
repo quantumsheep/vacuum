@@ -40,4 +40,6 @@ enum map_delete_mode_t
 
 void map_remove(Map *map, const char *key, MapDeleteMode mode);
 
+void map_free(Map *map, int free_values);
+
 #endif

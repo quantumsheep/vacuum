@@ -130,3 +130,28 @@ void map_remove(Map *map, const char *key, MapDeleteMode mode)
         free(node);
     }
 }
+
+void map_free(Map *map, int free_values)
+{
+    if (map == NULL)
+        return;
+
+    MapNode *node = map->first;
+
+    while (node != NULL)
+    {
+        MapNode *next = node->next;
+
+        if (free_values)
+        {
+            free(node->value);
+        }
+
+        free(node->key);
+        free(node);
+
+        node = next;
+    }
+
+    free(map);
+}

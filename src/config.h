@@ -61,4 +61,8 @@ Config config_parse(Vector *tokens);
 ConfigToken *config_create_token(ConfigTokenType type, char *value, int line, int copy_has_ref);
 Vector *config_tokenize(const char *path);
 
+void config_action_free(ConfigAction *action);
+void config_task_free(ConfigTask *task);
+void config_free(Config config);
+
 #endif

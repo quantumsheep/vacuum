@@ -131,7 +131,7 @@ void map_remove(Map *map, const char *key, MapDeleteMode mode)
     }
 }
 
-void map_free(Map *map, int free_values)
+void map_free(Map *map, MapDeleteMode mode)
 {
     if (map == NULL)
         return;
@@ -142,12 +142,16 @@ void map_free(Map *map, int free_values)
     {
         MapNode *next = node->next;
 
-        if (free_values)
+        if (mode == MAP_FREE_REFERENCE && node->value != NULL)
         {
             free(node->value);
         }
 
-        free(node->key);
+        if (node->key != NULL)
+        {
+            free(node->key);
+        }
+
         free(node);
 
         node = next;

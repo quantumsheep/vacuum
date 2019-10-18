@@ -15,7 +15,7 @@ Vector *vector_init()
     return vec;
 }
 
-void *vector_get(Vector *vec, unsigned int index)
+void *vector_get(const Vector *vec, unsigned int index)
 {
     if (index < vec->length)
     {
@@ -25,12 +25,12 @@ void *vector_get(Vector *vec, unsigned int index)
     return NULL;
 }
 
-char *vector_get_string(Vector *vec, unsigned int index)
+char *vector_get_string(const Vector *vec, unsigned int index)
 {
     return (char *)vector_get(vec, index);
 }
 
-int *vector_get_int(Vector *vec, unsigned int index)
+int *vector_get_int(const Vector *vec, unsigned int index)
 {
     return (int *)vector_get(vec, index);
 }

@@ -15,7 +15,7 @@ int main()
         return 1;
     }
 
-    int max_depth = 5;
+    int max_depth = 3;
     Vector *visited = crawl("https://qtmsheep.com", max_depth, NULL);
 
     for (int i = 0; i < visited->length; i++)

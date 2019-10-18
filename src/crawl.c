@@ -27,21 +27,21 @@ static Vector *get_urls(const char *page)
     {
         char *end = NULL;
 
-        if (start != page && *(start - 1) == '"')
+        if (start != page)
         {
-            end = strchr(start, '"');
-        }
-        else if (start != page && *(start - 1) == '\'')
-        {
-            end = strchr(start, '\'');
-        }
-        else
-        {
-            end = start;
+            char before = *(start - 1);
 
-            while (is_valid_url_char(*end))
+            if (before == '"' || before == '\'')
             {
-                end++;
+                end = strchr(start, before);
+            }
+        }
+
+        if (end == NULL)
+        {
+            for (end = start; is_valid_url_char(*end); end++)
+            {
+                continue;
             }
         }
 
@@ -93,17 +93,19 @@ Vector *crawl(const char *url, int max_depth, Vector *visited)
         visited = vector_init();
     }
 
+    vector_push_string(visited, url);
+
     if (max_depth > 0)
     {
-        Vector *next_urls = get_urls(res);
+        Vector *urls = get_urls(res);
 
-        for (int i = 0; i < next_urls->length; i++)
+        for (int i = 0; i < urls->length; i++)
         {
-            char *url = vector_get_string(next_urls, i);
+            char *url = vector_get_string(urls, i);
 
             if (!url_already_visited(visited, url))
             {
-                vector_concat(visited, crawl(url, max_depth, visited));
+                crawl(url, max_depth, visited);
             }
         }
     }

@@ -22,6 +22,8 @@ unsigned int vector_push(Vector *vec, const void *value, size_t size);
 unsigned int vector_push_string(Vector *vec, const char *value);
 unsigned int vector_push_int(Vector *vec, int value);
 
+void vector_concat(Vector *destination, const Vector *source);
+
 typedef enum vector_delete_mode_t VectorDeleteMode;
 enum vector_delete_mode_t
 {

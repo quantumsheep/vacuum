@@ -1,7 +1,7 @@
 #include "vector.h"
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 Vector *vector_init()
 {
@@ -65,6 +65,14 @@ unsigned int vector_push_string(Vector *vec, const char *value)
 unsigned int vector_push_int(Vector *vec, int value)
 {
     return vector_push(vec, &value, sizeof(int));
+}
+
+void vector_concat(Vector *destination, const Vector *source)
+{
+    for (int i = 0; i < source->length; i++)
+    {
+        vector_push_ref(destination, vector_get(source, i));
+    }
 }
 
 void vector_remove(Vector *vec, unsigned int index, VectorDeleteMode mode)

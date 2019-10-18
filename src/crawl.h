@@ -3,6 +3,6 @@
 
 #include "datatypes/vector.h"
 
-Vector *crawl(const char *url);
+Vector *crawl(const char *url, int max_depth, Vector *visited);
 
 #endif

@@ -9,6 +9,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+static int is_valid_url_char(char c)
+{
+    int is_alphanum = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+    int is_special_char = (c == '.') || (c == '%') || (c == '#') || (c == ':') || (c == '/') || (c == ';');
+    int is_query_char = (c == '?') || (c == '&') || (c == '=') || (c == '+');
+
+    return c != '\0' && (is_alphanum || is_special_char || is_query_char);
+}
+
 static Vector *get_urls(const char *page)
 {
     Vector *urls = vector_init();
@@ -16,7 +25,25 @@ static Vector *get_urls(const char *page)
     char *start = NULL;
     while ((start = strstr(page, "https://")) || (start = strstr(page, "http://")))
     {
-        char *end = strchr(start, '"');
+        char *end = NULL;
+
+        if (start != page && *(start - 1) == '"')
+        {
+            end = strchr(start, '"');
+        }
+        else if (start != page && *(start - 1) == '\'')
+        {
+            end = strchr(start, '\'');
+        }
+        else
+        {
+            end = start;
+
+            while (is_valid_url_char(*end))
+            {
+                end++;
+            }
+        }
 
         size_t len = end - start;
 
@@ -31,21 +58,55 @@ static Vector *get_urls(const char *page)
     return urls;
 }
 
-Vector *crawl(const char *url)
+static int url_already_visited(const Vector *visited, const char *url)
 {
-    char *res = http_get(url);
-
-    FILE *target = fopen("fix.txt", "w");
-    if (target == NULL)
+    for (int i = 0; i < visited->length; i++)
     {
-        printf("Failed to create the file.\n");
-        return NULL;
+        if (strcmp(vector_get_string(visited, i), url) == 0)
+        {
+            return 1;
+        }
     }
 
-    fputs(res, target);
-    fclose(target);
+    return 0;
+}
 
-    Vector *visited = get_urls(res);
+Vector *crawl(const char *url, int max_depth, Vector *visited)
+{
+    max_depth--;
+    printf("%d - %s\n", max_depth, url);
+
+    char *res = http_get(url);
+
+    // FILE *target = fopen("fix.txt", "w");
+    // if (target == NULL)
+    // {
+    //     printf("Failed to create the file.\n");
+    //     return NULL;
+    // }
+
+    // fputs(res, target);
+    // fclose(target);
+
+    if (visited == NULL)
+    {
+        visited = vector_init();
+    }
+
+    if (max_depth > 0)
+    {
+        Vector *next_urls = get_urls(res);
+
+        for (int i = 0; i < next_urls->length; i++)
+        {
+            char *url = vector_get_string(next_urls, i);
+
+            if (!url_already_visited(visited, url))
+            {
+                vector_concat(visited, crawl(url, max_depth, visited));
+            }
+        }
+    }
 
     return visited;
 }

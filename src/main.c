@@ -1,9 +1,9 @@
-#include <stdio.h>
-#include <string.h>
-#include "crawl.h"
 #include "config.h"
+#include "crawl.h"
+#include "datatypes/vector.h"
 #include "file.h"
-#define lengthMax 1000
+
+#include <stdio.h>
 
 int main()
 {
@@ -12,24 +12,17 @@ int main()
 
     if (has_error)
     {
-       return 1;
+        return 1;
     }
 
-    FILE *file = crawl("https://qtmsheep.com");
+    Vector *visited = crawl("https://qtmsheep.com");
 
-
-    char ** tab = httpsTabs(file,lengthMax);
-    	
-    
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < visited->length; i++)
     {
-    	printf("LES URLS = %s\n", tab[i]);
+        printf("LES URLS = %s\n", vector_get_string(visited, i));
     }
 
-    
-    tab_url_free(tab);
-    fclose(file);
-
+    vector_free(visited, VECTOR_FREE_REFERENCE);
     config_free(config);
 
     return 0;

@@ -55,3 +55,12 @@ void config_free(Config config)
         map_free(config.tasks, MAP_KEEP_REFERENCE);
     }
 }
+
+void tab_url_free(char ** tab){
+
+    for (int i = 0; i < 10; ++i)
+    {
+        free(tab[i]);
+    }
+    free(tab);
+}

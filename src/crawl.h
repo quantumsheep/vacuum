@@ -1,6 +1,7 @@
 #ifndef CRAWL_H
 #define CRAWL_H
 
-void crawl(const char *url);
+FILE * crawl(const char *url);
+char **httpsTabs(FILE * file, int lenghtMax);
 
 #endif

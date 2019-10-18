@@ -64,6 +64,5 @@ Vector *config_tokenize(const char *path, int *has_error);
 void config_action_free(ConfigAction *action);
 void config_task_free(ConfigTask *task);
 void config_free(Config config);
-void tab_url_free(char ** tab);
 
 #endif

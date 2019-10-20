@@ -10,6 +10,7 @@
 {url -> https://myges.fr}
 +
 {max-depth -> 5}
+{type -> (text/html, text/javascript)}
 
 ==
 {name -> Test Task}

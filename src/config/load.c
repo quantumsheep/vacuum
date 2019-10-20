@@ -25,9 +25,23 @@ Config config_load(const char *path, int *has_error)
             printf("  [url]: %s\n", action->url);
             printf("  options:\n");
 
-            for (MapNode *option = action->options->first; option != NULL; option = option->next)
+            for (MapNode *option_node = action->options->first; option_node != NULL; option_node = option_node->next)
             {
-                printf("    [%s]: %s\n", option->key, (char *)option->value);
+                ConfigOption *option = (ConfigOption *)option_node->value;
+
+                if (option->type == CONFIG_OPTION_STRING)
+                {
+                    printf("    [%s]: '%s'\n", option_node->key, option->value.str);
+                }
+                else if (option->type == CONFIG_OPTION_ARRAY)
+                {
+                    printf("    [%s]:\n", option_node->key);
+
+                    for (int i = 0; i < option->value.arr->length; i++)
+                    {
+                        printf("      [%d]: '%s'\n", i, vector_get_string(option->value.arr, i));
+                    }
+                }
             }
         }
 

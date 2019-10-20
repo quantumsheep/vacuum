@@ -4,12 +4,32 @@
 #include "datatypes/map.h"
 #include "datatypes/vector.h"
 
+typedef enum config_option_type_t ConfigOptionType;
+enum config_option_type_t
+{
+    CONFIG_OPTION_STRING,
+    CONFIG_OPTION_ARRAY,
+};
+
+typedef union config_option_value_t ConfigOptionValue;
+union config_option_value_t {
+    char *str;
+    Vector *arr;
+};
+
+typedef struct config_option_t ConfigOption;
+struct config_option_t
+{
+    ConfigOptionType type;
+    ConfigOptionValue value;
+};
+
 typedef struct config_action_t ConfigAction;
 struct config_action_t
 {
     char *url;
 
-    Map *options;
+    Map *options; // Map<ConfigOption>
 };
 
 typedef struct config_task_t ConfigTask;
@@ -19,14 +39,14 @@ struct config_task_t
     int minutes;
     int seconds;
 
-    Vector *actions;
+    Vector *actions; // Vector<char *>
 };
 
 typedef struct config_t Config;
 struct config_t
 {
-    Map *actions;
-    Map *tasks;
+    Map *actions; // Map<ConfigAction>
+    Map *tasks;   // Map<ConfigTask>
 };
 
 typedef enum config_token_type_t ConfigTokenType;
@@ -51,6 +71,10 @@ struct config_token_item_t
     char *value;
     int line;
 };
+
+ConfigOption *config_option_init(ConfigOptionType type);
+ConfigOption *config_option_init_string(const char *s);
+ConfigOption *config_option_init_array(Vector *vec);
 
 ConfigAction *config_action_init(const char *url, Map *options);
 ConfigTask *config_task_init(int hours, int minutes, int seconds, Vector *actions);

@@ -1,6 +1,7 @@
 #include "../config.h"
 #include "../file.h"
 
+#include <stddef.h>
 #include <string.h>
 
 ConfigToken *config_create_token(ConfigTokenType type, char *value, int line, int copy_has_ref)
@@ -81,6 +82,11 @@ Vector *config_tokenize(const char *path, int *has_error)
         else if (starts_with(cursor, ","))
         {
             vector_push_ref(tokens, config_create_token(TOKEN_ARRAY_SEPARATOR, ",", line, 0));
+        }
+        else if (starts_with(cursor, "#"))
+        {
+            ptrdiff_t diff = strchr(cursor, '\n') - cursor;
+            i += diff - 1;
         }
         else if ((*cursor >= 'a' && *cursor <= 'z') || (*cursor >= 'A' && *cursor <= 'Z') || (*cursor >= '0' && *cursor <= '9') || (*cursor == '_') || (*cursor == '-'))
         {

@@ -13,14 +13,14 @@ struct vector_t
 };
 
 Vector *vector_init();
-void *vector_get(const Vector *vec, unsigned int index);
-char *vector_get_string(const Vector *vec, unsigned int index);
-int *vector_get_int(const Vector *vec, unsigned int index);
+void *vector_get(const Vector *vec, size_t index);
+char *vector_get_string(const Vector *vec, size_t index);
+int *vector_get_int(const Vector *vec, size_t index);
 
-unsigned int vector_push_ref(Vector *vec, void *ptr);
-unsigned int vector_push(Vector *vec, const void *value, size_t size);
-unsigned int vector_push_string(Vector *vec, const char *value);
-unsigned int vector_push_int(Vector *vec, int value);
+size_t vector_push_ref(Vector *vec, void *ptr);
+size_t vector_push(Vector *vec, const void *value, size_t size);
+size_t vector_push_string(Vector *vec, const char *value);
+size_t vector_push_int(Vector *vec, int value);
 
 void vector_concat(Vector *destination, const Vector *source);
 
@@ -31,7 +31,7 @@ enum vector_delete_mode_t
     VECTOR_FREE_REFERENCE,
 };
 
-void vector_remove(Vector *vec, unsigned int index, VectorDeleteMode mode);
+void vector_remove(Vector *vec, size_t index, VectorDeleteMode mode);
 
 void vector_free(Vector *vec, VectorDeleteMode mode);
 

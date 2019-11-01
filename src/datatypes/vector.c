@@ -15,7 +15,7 @@ Vector *vector_init()
     return vec;
 }
 
-void *vector_get(const Vector *vec, unsigned int index)
+void *vector_get(const Vector *vec, size_t index)
 {
     if (index < vec->length)
     {
@@ -25,17 +25,17 @@ void *vector_get(const Vector *vec, unsigned int index)
     return NULL;
 }
 
-char *vector_get_string(const Vector *vec, unsigned int index)
+char *vector_get_string(const Vector *vec, size_t index)
 {
     return (char *)vector_get(vec, index);
 }
 
-int *vector_get_int(const Vector *vec, unsigned int index)
+int *vector_get_int(const Vector *vec, size_t index)
 {
     return (int *)vector_get(vec, index);
 }
 
-unsigned int vector_push_ref(Vector *vec, void *ptr)
+size_t vector_push_ref(Vector *vec, void *ptr)
 {
     if (vec->length == vec->capacity)
     {
@@ -49,7 +49,7 @@ unsigned int vector_push_ref(Vector *vec, void *ptr)
     return vec->length++;
 }
 
-unsigned int vector_push(Vector *vec, const void *value, size_t size)
+size_t vector_push(Vector *vec, const void *value, size_t size)
 {
     void *ptr = (void *)calloc(sizeof(void), size);
     memcpy(ptr, value, size);
@@ -57,12 +57,12 @@ unsigned int vector_push(Vector *vec, const void *value, size_t size)
     return vector_push_ref(vec, ptr);
 }
 
-unsigned int vector_push_string(Vector *vec, const char *value)
+size_t vector_push_string(Vector *vec, const char *value)
 {
     return vector_push(vec, value, sizeof(char) * (strlen(value) + 1));
 }
 
-unsigned int vector_push_int(Vector *vec, int value)
+size_t vector_push_int(Vector *vec, int value)
 {
     return vector_push(vec, &value, sizeof(int));
 }
@@ -75,7 +75,7 @@ void vector_concat(Vector *destination, const Vector *source)
     }
 }
 
-void vector_remove(Vector *vec, unsigned int index, VectorDeleteMode mode)
+void vector_remove(Vector *vec, size_t index, VectorDeleteMode mode)
 {
     if (index < vec->length)
     {

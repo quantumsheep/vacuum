@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+
+#include <curl/curl.h>
 
 static int is_valid_url_char(char c)
 {
@@ -71,22 +74,175 @@ static int url_already_visited(const Vector *visited, const char *url)
     return 0;
 }
 
+typedef struct url_t URL;
+struct url_t
+{
+    char *host;
+    char *path;
+    char *page;
+    char *query;
+
+    char *fullpath;
+};
+
+static URL *parse_url(const char *url)
+{
+    CURLU *cut = curl_url();
+    CURLUcode rc = curl_url_set(cut, CURLUPART_URL, url, 0);
+
+    if (rc)
+    {
+        return NULL;
+    }
+
+    URL *parts = malloc(sizeof(URL));
+
+    curl_url_get(cut, CURLUPART_HOST, &parts->host, 0);
+    curl_url_get(cut, CURLUPART_PATH, &parts->path, 0);
+    curl_url_get(cut, CURLUPART_QUERY, &parts->query, 0);
+    curl_url_cleanup(cut);
+
+    if (parts->path == NULL || (strcmp(parts->path, "/") == 0))
+    {
+        const char base[] = "index.html";
+        parts->page = (char *)calloc(sizeof(char), sizeof(base) + 1);
+        strcpy(parts->page, base);
+    }
+    else
+    {
+        char *last = strrchr(parts->path, '/');
+        last[0] = '\0';
+
+        parts->page = last + 1;
+    }
+
+    size_t size = 0;
+
+    if (parts->host != NULL)
+        size += strlen(parts->host);
+
+    if (parts->path != NULL)
+        size += strlen(parts->path);
+
+    if (parts->page != NULL)
+        size += strlen(parts->page);
+
+    parts->fullpath = (char *)calloc(sizeof(char), size + 2);
+
+    if (parts->host != NULL)
+        strcat(parts->fullpath, parts->host);
+
+    if (parts->path != NULL)
+        strcat(parts->fullpath, parts->path);
+
+    if (parts->page != NULL)
+    {
+        strcat(parts->fullpath, "/");
+        strcat(parts->fullpath, parts->page);
+    }
+
+    return parts;
+}
+
+static void free_url(URL *url)
+{
+    if (url->host != NULL)
+        curl_free(url->host);
+
+    if (url->path != NULL)
+    {
+        curl_free(url->path);
+    }
+    else
+    {
+        free(url->page);
+    }
+
+    if (url->query != NULL)
+        curl_free(url->query);
+
+    if (url->fullpath != NULL)
+        curl_free(url->fullpath);
+
+    free(url);
+}
+
+static int mkdir_bypass_exists(const char *path)
+{
+    if (mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO) == -1)
+    {
+        int err = errno;
+
+        if (err != EEXIST)
+        {
+            return err;
+        }
+    }
+
+    return 0;
+}
+
+static int mkdir_recurse(const char *path, int take_last)
+{
+    const char *start = path;
+    size_t size = 0;
+
+    while (*path != '\0')
+    {
+        if (*path == '/')
+        {
+            char *part = (char *)calloc(sizeof(char), size);
+            strncpy(part, start, size);
+
+            int err = mkdir_bypass_exists(part);
+            if (err != 0)
+                return err;
+
+            free(part);
+        }
+
+        size++;
+        path++;
+    }
+
+    if (take_last)
+    {
+        return mkdir_bypass_exists(start);
+    }
+
+    return 0;
+}
+
+static void save_response(const char *url, const char *buffer)
+{
+    URL *parts = parse_url(url);
+
+    const char prefix[] = "data/";
+    char *file_path = (char *)calloc(sizeof(char), strlen(parts->fullpath) + sizeof(prefix) + 1);
+    strcat(file_path, prefix);
+    strcat(file_path, parts->fullpath);
+
+    mkdir_recurse(file_path, 0);
+    FILE *target = fopen(file_path, "w");
+    if (target == NULL)
+    {
+        printf("Failed to create the file: '%s'.\n", file_path);
+        return;
+    }
+
+    fputs(buffer, target);
+    fclose(target);
+
+    free(file_path);
+}
+
 Vector *crawl(const char *url, int max_depth, Vector *visited)
 {
     max_depth--;
     printf("%d - %s\n", max_depth, url);
 
     char *res = http_get(url);
-
-    // FILE *target = fopen("fix.txt", "w");
-    // if (target == NULL)
-    // {
-    //     printf("Failed to create the file.\n");
-    //     return NULL;
-    // }
-
-    // fputs(res, target);
-    // fclose(target);
+    save_response(url, res);
 
     if (visited == NULL)
     {

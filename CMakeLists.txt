@@ -5,6 +5,8 @@ project(crawler C)
 
 file(GLOB SOURCES src/*.c src/*/*.c)
 
+find_package(Threads)
+
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} curl)
+target_link_libraries(${PROJECT_NAME} curl ${CMAKE_THREAD_LIBS_INIT})

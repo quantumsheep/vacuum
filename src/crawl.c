@@ -238,7 +238,6 @@ static void save_response(const char *url, const char *buffer)
 
 Vector *crawl(const char *url, int max_depth, Vector *visited)
 {
-    max_depth--;
     printf("%d - %s\n", max_depth, url);
 
     char *res = http_get(url);
@@ -253,6 +252,8 @@ Vector *crawl(const char *url, int max_depth, Vector *visited)
 
     if (max_depth > 0)
     {
+        max_depth--;
+
         Vector *urls = get_urls(res);
 
         for (int i = 0; i < urls->length; i++)

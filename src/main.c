@@ -4,10 +4,19 @@
 #include "file.h"
 #include "scheduler.h"
 
+#include <ctype.h>
 #include <stdio.h>
 
 static Config config;
 static Vector *workers = NULL;
+
+static int is_number(const char *str)
+{
+    while (*str != '\0' && isdigit(*str))
+        str++;
+
+    return *str == '\0';
+}
 
 void run_action(const char *name)
 {
@@ -17,9 +26,22 @@ void run_action(const char *name)
         return;
 
     ConfigAction *action = (ConfigAction *)node->value;
-    char *max_depth_str = map_get_string(action->options, "max-depth");
 
-    int max_depth = (max_depth_str != NULL) ? atoi(max_depth_str) : 1;
+    ConfigOption *max_depth_option = (ConfigOption *)map_get_value(action->options, "max-depth");
+
+    int max_depth = 0;
+
+    if (max_depth_option)
+    {
+        if (max_depth_option->type == CONFIG_OPTION_ARRAY || !is_number(max_depth_option->value.str))
+        {
+            puts("Option 'max-depth' must be a valid number.");
+        }
+        else
+        {
+            max_depth = atoi(max_depth_option->value.str);
+        }
+    }
 
     Vector *visited = crawl(action->url, max_depth, NULL);
     vector_free(visited, VECTOR_FREE_REFERENCE);

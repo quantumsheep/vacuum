@@ -51,6 +51,8 @@ void run_action(const char *name)
                         (versioning_option->type == CONFIG_OPTION_STRING) &&
                         (strcmp(versioning_option->value.str, "on") == 0);
 
+    log_print_timed("[%s] Crawling %s\n", name, action->url);
+
     Vector *visited = crawl(action->url, config, NULL);
     vector_free(visited, VECTOR_FREE_REFERENCE);
 }
@@ -67,6 +69,8 @@ void on_exit()
 int main()
 {
     log_init("log.txt");
+
+    log_print_timed("Loading configuration file: %s\n", "config.sconf");
 
     int has_error = 0;
     config = config_load("config.sconf", &has_error);

@@ -2,10 +2,12 @@
 #include "crawl.h"
 #include "datatypes/vector.h"
 #include "file.h"
+#include "log.h"
 #include "scheduler.h"
 
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 
 static Config config;
 static Vector *workers = NULL;
@@ -64,6 +66,8 @@ void on_exit()
 
 int main()
 {
+    log_init("log.txt");
+
     int has_error = 0;
     config = config_load("config.sconf", &has_error);
 

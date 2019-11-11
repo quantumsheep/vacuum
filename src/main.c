@@ -28,10 +28,12 @@ void run_action(const char *name)
     ConfigAction *action = (ConfigAction *)node->value;
 
     ConfigOption *max_depth_option = (ConfigOption *)map_get_value(action->options, "max-depth");
+    ConfigOption *versioning_option = (ConfigOption *)map_get_value(action->options, "versioning");
 
-    int max_depth = 0;
+    CrawlConfig config;
+    config.max_depth = 0;
 
-    if (max_depth_option)
+    if (max_depth_option != NULL)
     {
         if (max_depth_option->type == CONFIG_OPTION_ARRAY || !is_number(max_depth_option->value.str))
         {
@@ -39,11 +41,15 @@ void run_action(const char *name)
         }
         else
         {
-            max_depth = atoi(max_depth_option->value.str);
+            config.max_depth = atoi(max_depth_option->value.str);
         }
     }
 
-    Vector *visited = crawl(action->url, max_depth, NULL);
+    config.versioning = (versioning_option != NULL) &&
+                        (versioning_option->type == CONFIG_OPTION_STRING) &&
+                        (strcmp(versioning_option->value.str, "on") == 0);
+
+    Vector *visited = crawl(action->url, config, NULL);
     vector_free(visited, VECTOR_FREE_REFERENCE);
 }
 

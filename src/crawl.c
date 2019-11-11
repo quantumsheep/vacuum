@@ -3,6 +3,7 @@
 #include "config.h"
 #include "file.h"
 #include "http.h"
+#include "parallel/file_writing.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -223,22 +224,18 @@ static void save_response(const char *url, const char *buffer)
     strcat(file_path, parts->fullpath);
 
     mkdir_recurse(file_path, 0);
-    FILE *target = fopen(file_path, "w");
-    if (target == NULL)
-    {
-        printf("Failed to create the file: '%s'.\n", file_path);
-        return;
-    }
 
-    fputs(buffer, target);
-    fclose(target);
+    if (!parallel_file_write(file_path, buffer))
+    {
+        printf("Failed to write the file: '%s'.\n", file_path);
+    }
 
     free(file_path);
 }
 
-Vector *crawl(const char *url, int max_depth, Vector *visited)
+Vector *crawl(const char *url, CrawlConfig config, Vector *visited)
 {
-    printf("%d - %s\n", max_depth, url);
+    printf("%d - %s\n", config.max_depth, url);
 
     char *res = http_get(url);
     save_response(url, res);
@@ -250,9 +247,9 @@ Vector *crawl(const char *url, int max_depth, Vector *visited)
 
     vector_push_string(visited, url);
 
-    if (max_depth > 0)
+    if (config.max_depth > 0)
     {
-        max_depth--;
+        config.max_depth--;
 
         Vector *urls = get_urls(res);
 
@@ -262,7 +259,7 @@ Vector *crawl(const char *url, int max_depth, Vector *visited)
 
             if (!url_already_visited(visited, url))
             {
-                crawl(url, max_depth, visited);
+                crawl(url, config, visited);
             }
         }
     }

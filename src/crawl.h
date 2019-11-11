@@ -3,6 +3,13 @@
 
 #include "datatypes/vector.h"
 
-Vector *crawl(const char *url, int max_depth, Vector *visited);
+typedef struct crawl_config_t CrawlConfig;
+struct crawl_config_t
+{
+    int max_depth;
+    int versioning;
+};
+
+Vector *crawl(const char *url, CrawlConfig config, Vector *visited);
 
 #endif

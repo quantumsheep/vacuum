@@ -225,7 +225,7 @@ static void save_response(const char *url, const char *buffer)
 
     mkdir_recurse(file_path, 0);
 
-    if (!parallel_file_write(file_path, buffer))
+    if (!parallel_file_write(file_path, "w", buffer))
     {
         printf("Failed to write the file: '%s'.\n", file_path);
     }

@@ -39,7 +39,7 @@ static pthread_mutex_t *file_mutex(const char *path)
     return mutex;
 }
 
-int parallel_file_append(const char *path, const char *data)
+int parallel_file_vwrite(const char *path, const char *mode, const char *fmt, va_list list)
 {
     pthread_mutex_t *lock = file_mutex(path);
 
@@ -47,10 +47,10 @@ int parallel_file_append(const char *path, const char *data)
 
     pthread_mutex_lock(lock);
 
-    FILE *f = fopen(path, "a");
+    FILE *f = fopen(path, mode);
     if (f != NULL)
     {
-        fwrite(data, sizeof(char), strlen(data), f);
+        vfprintf(f, fmt, list);
         fclose(f);
 
         passed = 1;
@@ -61,24 +61,8 @@ int parallel_file_append(const char *path, const char *data)
     return passed;
 }
 
-int parallel_file_write(const char *path, const char *data)
+int parallel_file_write(const char *path, const char *mode, const char *fmt, ...)
 {
-    pthread_mutex_t *lock = file_mutex(path);
-
-    int passed = 0;
-
-    pthread_mutex_lock(lock);
-
-    FILE *f = fopen(path, "w");
-    if (f != NULL)
-    {
-        fwrite(data, sizeof(char), strlen(data), f);
-        fclose(f);
-
-        passed = 1;
-    }
-
-    pthread_mutex_unlock(lock);
-
-    return passed;
+    va_list list;
+    return parallel_file_vwrite(path, mode, fmt, list);
 }

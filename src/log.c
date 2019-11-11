@@ -17,7 +17,6 @@ void log_print(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
 
-    vprintf(fmt, args);
     parallel_file_vwrite(log_path, "a", fmt, args);
 
     va_end(args);

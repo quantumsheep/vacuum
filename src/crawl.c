@@ -66,7 +66,7 @@ static Vector *get_urls(const char *page)
 
 static int url_already_visited(const Vector *visited, const char *url)
 {
-    for (int i = 0; i < visited->length; i++)
+    for (size_t i = 0; i < visited->length; i++)
     {
         if (strcmp(vector_get_string(visited, i), url) == 0)
         {

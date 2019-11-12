@@ -24,6 +24,9 @@ size_t vector_push_int(Vector *vec, int value);
 
 void vector_concat(Vector *destination, const Vector *source);
 
+int vector_includes_string(const Vector *vec, const char *str);
+int vector_includes_string_n(const Vector *vec, const char *str, size_t size);
+
 typedef enum vector_delete_mode_t VectorDeleteMode;
 enum vector_delete_mode_t
 {

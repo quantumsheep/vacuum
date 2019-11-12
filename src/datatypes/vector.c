@@ -75,6 +75,34 @@ void vector_concat(Vector *destination, const Vector *source)
     }
 }
 
+int vector_includes_string(const Vector *vec, const char *str)
+{
+    for (size_t i = 0; i < vec->length; i++)
+    {
+        const char *target = (const char *)vector_get(vec, i);
+        if (strcmp(target, str) == 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int vector_includes_string_n(const Vector *vec, const char *str, size_t size)
+{
+    for (size_t i = 0; i < vec->length; i++)
+    {
+        const char *target = (const char *)vector_get(vec, i);
+        if (strncmp(target, str, size) == 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 void vector_remove(Vector *vec, size_t index, VectorDeleteMode mode)
 {
     if (index < vec->length)

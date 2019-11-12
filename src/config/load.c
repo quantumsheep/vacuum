@@ -39,7 +39,7 @@ Config config_load(const char *path, int *has_error)
 
                     for (size_t i = 0; i < option->value.arr->length; i++)
                     {
-                        printf("      [%d]: '%s'\n", i, vector_get_string(option->value.arr, i));
+                        printf("      [%lu]: '%s'\n", i, vector_get_string(option->value.arr, i));
                     }
                 }
             }

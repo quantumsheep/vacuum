@@ -69,7 +69,7 @@ size_t vector_push_int(Vector *vec, int value)
 
 void vector_concat(Vector *destination, const Vector *source)
 {
-    for (int i = 0; i < source->length; i++)
+    for (size_t i = 0; i < source->length; i++)
     {
         vector_push_ref(destination, vector_get(source, i));
     }
@@ -112,7 +112,7 @@ void vector_remove(Vector *vec, size_t index, VectorDeleteMode mode)
             free(vec->values[index]);
         }
 
-        for (int i = index; i < (vec->length - 1); i++)
+        for (size_t i = index; i < (vec->length - 1); i++)
         {
             vec->values[i] = vec->values[i + 1];
         }
@@ -128,7 +128,7 @@ void vector_free(Vector *vec, VectorDeleteMode mode)
 
     if (mode == VECTOR_FREE_REFERENCE)
     {
-        for (int i = 0; i < vec->length; i++)
+        for (size_t i = 0; i < vec->length; i++)
         {
             void *value = vector_get(vec, i);
 

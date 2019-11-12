@@ -233,6 +233,7 @@ static void save_response(const char *url, const char *buffer, const char *prefi
     }
 
     free(file_path);
+    free_url(parts);
 }
 
 Vector *crawl(const char *url, CrawlConfig config, Vector *visited)

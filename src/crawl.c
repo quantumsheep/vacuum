@@ -194,7 +194,7 @@ static int mkdir_recurse(const char *path, int take_last)
     {
         if (*path == '/')
         {
-            char *part = (char *)calloc(sizeof(char), size);
+            char *part = (char *)calloc(sizeof(char), size + 1);
             strncpy(part, start, size);
 
             int err = mkdir_bypass_exists(part);
@@ -216,13 +216,13 @@ static int mkdir_recurse(const char *path, int take_last)
     return 0;
 }
 
-static void save_response(const char *url, const char *buffer)
+static void save_response(const char *url, const char *buffer, const char *prefix)
 {
     URL *parts = parse_url(url);
 
-    const char prefix[] = "data/";
-    char *file_path = (char *)calloc(sizeof(char), strlen(parts->fullpath) + sizeof(prefix) + 1);
+    char *file_path = (char *)calloc(sizeof(char), strlen(prefix) + 1 + strlen(parts->fullpath) + 1);
     strcat(file_path, prefix);
+    strcat(file_path, "/");
     strcat(file_path, parts->fullpath);
 
     mkdir_recurse(file_path, 0);
@@ -246,7 +246,7 @@ Vector *crawl(const char *url, CrawlConfig config, Vector *visited)
         size_t limit = strchr(res.content_type, ';') - res.content_type;
         if (config.types == NULL || vector_includes_string_n(config.types, res.content_type, limit))
         {
-            save_response(url, res.buffer);
+            save_response(url, res.buffer, config.storage_directory);
         }
 
         if (visited == NULL)

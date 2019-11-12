@@ -20,23 +20,20 @@ static int is_number(const char *str)
     return *str == '\0';
 }
 
-void run_action(const char *name)
+static CrawlConfig generate_crawl_config(const ConfigAction *action)
 {
-    MapNode *node = map_get(config.actions, name);
-
-    if (node == NULL)
-        return;
-
-    ConfigAction *action = (ConfigAction *)node->value;
-
     ConfigOption *max_depth_option = (ConfigOption *)map_get_value(action->options, "max-depth");
     ConfigOption *versioning_option = (ConfigOption *)map_get_value(action->options, "versioning");
     ConfigOption *type_option = (ConfigOption *)map_get_value(action->options, "type");
+
+    static char base_prefix[] = "data";
 
     CrawlConfig config = (CrawlConfig){
         .max_depth = 0,
         .versioning = 0,
         .types = NULL,
+
+        .storage_directory = NULL,
     };
 
     if (versioning_option != NULL)
@@ -75,10 +72,43 @@ void run_action(const char *name)
         }
     }
 
+    if (config.versioning)
+    {
+        time_t timer;
+        struct tm *tm_info;
+
+        time(&timer);
+        tm_info = localtime(&timer);
+
+        config.storage_directory = (char *)calloc(sizeof(char), sizeof(base_prefix) + 11 + 1);
+        strcat(config.storage_directory, base_prefix);
+        strftime((config.storage_directory + sizeof(base_prefix) - 1), 11, "-%Y-%m-%d", tm_info);
+    }
+    else
+    {
+        config.storage_directory = (char *)malloc(sizeof(base_prefix));
+        memcpy(config.storage_directory, base_prefix, sizeof(base_prefix));
+    }
+
+    return config;
+}
+
+void run_action(const char *name)
+{
+    MapNode *node = map_get(config.actions, name);
+
+    if (node == NULL)
+        return;
+
+    ConfigAction *action = (ConfigAction *)node->value;
+    CrawlConfig config = generate_crawl_config(action);
+
     log_print_timed("[%s] Crawling %s\n", name, action->url);
 
     Vector *visited = crawl(action->url, config, NULL);
     vector_free(visited, VECTOR_FREE_REFERENCE);
+
+    free(config.storage_directory);
 }
 
 void on_exit()

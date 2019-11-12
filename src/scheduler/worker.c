@@ -32,8 +32,6 @@ static void worker_thread(volatile Worker *worker)
 {
     time_t start = time(NULL);
 
-    printf("%d\n", worker->running);
-
     while (worker->running)
     {
         time_t now = time(NULL);

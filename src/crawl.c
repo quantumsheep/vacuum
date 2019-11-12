@@ -3,9 +3,11 @@
 #include "config.h"
 #include "file.h"
 #include "http.h"
+#include "log.h"
 #include "parallel/file_writing.h"
 
 #include <errno.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -235,31 +237,39 @@ static void save_response(const char *url, const char *buffer)
 
 Vector *crawl(const char *url, CrawlConfig config, Vector *visited)
 {
-    printf("%d - %s\n", config.max_depth, url);
+    log_print_timed("[Depth %d] Crawled %s\n", config.max_depth, url);
 
-    char *res = http_get(url);
-    save_response(url, res);
+    HttpResponse res = http_get(url);
 
-    if (visited == NULL)
+    if (res.buffer != NULL)
     {
-        visited = vector_init();
-    }
-
-    vector_push_string(visited, url);
-
-    if (config.max_depth > 0)
-    {
-        config.max_depth--;
-
-        Vector *urls = get_urls(res);
-
-        for (int i = 0; i < urls->length; i++)
+        size_t limit = strchr(res.content_type, ';') - res.content_type;
+        if (config.types == NULL || vector_includes_string_n(config.types, res.content_type, limit))
         {
-            char *url = vector_get_string(urls, i);
+            save_response(url, res.buffer);
+        }
 
-            if (!url_already_visited(visited, url))
+        if (visited == NULL)
+        {
+            visited = vector_init();
+        }
+
+        vector_push_string(visited, url);
+
+        if (config.max_depth > 0)
+        {
+            config.max_depth--;
+
+            Vector *urls = get_urls(res.buffer);
+
+            for (int i = 0; i < urls->length; i++)
             {
-                crawl(url, config, visited);
+                char *url = vector_get_string(urls, i);
+
+                if (!url_already_visited(visited, url))
+                {
+                    crawl(url, config, visited);
+                }
             }
         }
     }

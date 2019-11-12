@@ -8,6 +8,7 @@ struct crawl_config_t
 {
     int max_depth;
     int versioning;
+    Vector *types;
 };
 
 Vector *crawl(const char *url, CrawlConfig config, Vector *visited);

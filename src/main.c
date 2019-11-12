@@ -31,25 +31,49 @@ void run_action(const char *name)
 
     ConfigOption *max_depth_option = (ConfigOption *)map_get_value(action->options, "max-depth");
     ConfigOption *versioning_option = (ConfigOption *)map_get_value(action->options, "versioning");
+    ConfigOption *type_option = (ConfigOption *)map_get_value(action->options, "type");
 
-    CrawlConfig config;
-    config.max_depth = 0;
+    CrawlConfig config = (CrawlConfig){
+        .max_depth = 0,
+        .versioning = 0,
+        .types = NULL,
+    };
 
-    if (max_depth_option != NULL)
+    if (versioning_option != NULL)
     {
-        if (max_depth_option->type == CONFIG_OPTION_ARRAY || !is_number(max_depth_option->value.str))
+        if (versioning_option->type == CONFIG_OPTION_STRING)
         {
-            puts("Option 'max-depth' must be a valid number.");
+            config.versioning = strcmp(versioning_option->value.str, "on") == 0;
         }
         else
         {
-            config.max_depth = atoi(max_depth_option->value.str);
+            printf("'versioning' option must be a string (on / off).");
         }
     }
 
-    config.versioning = (versioning_option != NULL) &&
-                        (versioning_option->type == CONFIG_OPTION_STRING) &&
-                        (strcmp(versioning_option->value.str, "on") == 0);
+    if (type_option != NULL)
+    {
+        if (type_option->type == CONFIG_OPTION_ARRAY)
+        {
+            config.types = type_option->value.arr;
+        }
+        else
+        {
+            printf("'type' option must be an array.");
+        }
+    }
+
+    if (max_depth_option != NULL)
+    {
+        if (max_depth_option->type == CONFIG_OPTION_STRING && is_number(max_depth_option->value.str))
+        {
+            config.max_depth = atoi(max_depth_option->value.str);
+        }
+        else
+        {
+            puts("Option 'max-depth' must be a valid number.");
+        }
+    }
 
     log_print_timed("[%s] Crawling %s\n", name, action->url);
 

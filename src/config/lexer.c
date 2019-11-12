@@ -41,7 +41,7 @@ Vector *config_tokenize(const char *path, int *has_error)
 
     int line = 1;
 
-    for (int i = 0; i < len; i++)
+    for (size_t i = 0; i < len; i++)
     {
         char *cursor = sources + i;
 

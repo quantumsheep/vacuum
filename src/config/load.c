@@ -37,7 +37,7 @@ Config config_load(const char *path, int *has_error)
                 {
                     printf("    [%s]:\n", option_node->key);
 
-                    for (int i = 0; i < option->value.arr->length; i++)
+                    for (size_t i = 0; i < option->value.arr->length; i++)
                     {
                         printf("      [%d]: '%s'\n", i, vector_get_string(option->value.arr, i));
                     }
@@ -55,7 +55,7 @@ Config config_load(const char *path, int *has_error)
             printf("  [seconds]: %d\n", task->seconds);
             printf("  actions:\n");
 
-            for (int i = 0; i < task->actions->length; i++)
+            for (size_t i = 0; i < task->actions->length; i++)
             {
                 char *action = vector_get_string(task->actions, i);
                 printf("    - '%s'\n", action);

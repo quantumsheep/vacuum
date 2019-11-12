@@ -262,7 +262,7 @@ Vector *crawl(const char *url, CrawlConfig config, Vector *visited)
 
             Vector *urls = get_urls(res.buffer);
 
-            for (int i = 0; i < urls->length; i++)
+            for (size_t i = 0; i < urls->length; i++)
             {
                 char *url = vector_get_string(urls, i);
 

@@ -115,7 +115,7 @@ static Map *parse_options(Vector *tokens, int *index, int *has_error)
     return options;
 }
 
-static void parse_action(Map *actions, Vector *tokens, int *index, int *has_error)
+static void parse_action(Map *actions, Vector *tokens, size_t *index, int *has_error)
 {
     int i = *index;
     ConfigToken *token = (ConfigToken *)vector_get(tokens, i);
@@ -160,7 +160,7 @@ static void parse_action(Map *actions, Vector *tokens, int *index, int *has_erro
     *index = i;
 }
 
-static void parse_task(Map *tasks, Vector *tokens, int *index, int *has_error)
+static void parse_task(Map *tasks, Vector *tokens, size_t *index, int *has_error)
 {
     int i = *index;
     ConfigToken *token = (ConfigToken *)vector_get(tokens, i);

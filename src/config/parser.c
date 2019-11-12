@@ -234,7 +234,7 @@ Config config_parse(Vector *tokens, int *has_error)
     config.actions = map_init();
     config.tasks = map_init();
 
-    for (int i = 0; i < tokens->length; i++)
+    for (size_t i = 0; i < tokens->length; i++)
     {
         ConfigToken *token = (ConfigToken *)vector_get(tokens, i);
 

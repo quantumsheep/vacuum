@@ -13,8 +13,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include <curl/curl.h>
-
 static int is_valid_url_char(char c)
 {
     int is_alphanum = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');

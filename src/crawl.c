@@ -5,6 +5,7 @@
 #include "http.h"
 #include "log.h"
 #include "parallel/file_writing.h"
+#include "url.h"
 
 #include <errno.h>
 #include <stddef.h>
@@ -75,99 +76,6 @@ static int url_already_visited(const Vector *visited, const char *url)
     return 0;
 }
 
-typedef struct url_t URL;
-struct url_t
-{
-    char *host;
-    char *path;
-    char *page;
-    char *query;
-
-    char *fullpath;
-};
-
-static URL *parse_url(const char *url)
-{
-    CURLU *cut = curl_url();
-    CURLUcode rc = curl_url_set(cut, CURLUPART_URL, url, 0);
-
-    if (rc)
-    {
-        return NULL;
-    }
-
-    URL *parts = malloc(sizeof(URL));
-
-    curl_url_get(cut, CURLUPART_HOST, &parts->host, 0);
-    curl_url_get(cut, CURLUPART_PATH, &parts->path, 0);
-    curl_url_get(cut, CURLUPART_QUERY, &parts->query, 0);
-    curl_url_cleanup(cut);
-
-    if (parts->path == NULL || (strcmp(parts->path, "/") == 0))
-    {
-        const char base[] = "index.html";
-        parts->page = (char *)calloc(sizeof(char), sizeof(base) + 1);
-        strcpy(parts->page, base);
-    }
-    else
-    {
-        char *last = strrchr(parts->path, '/');
-        last[0] = '\0';
-
-        parts->page = last + 1;
-    }
-
-    size_t size = 0;
-
-    if (parts->host != NULL)
-        size += strlen(parts->host);
-
-    if (parts->path != NULL)
-        size += strlen(parts->path);
-
-    if (parts->page != NULL)
-        size += strlen(parts->page);
-
-    parts->fullpath = (char *)calloc(sizeof(char), size + 2);
-
-    if (parts->host != NULL)
-        strcat(parts->fullpath, parts->host);
-
-    if (parts->path != NULL)
-        strcat(parts->fullpath, parts->path);
-
-    if (parts->page != NULL)
-    {
-        strcat(parts->fullpath, "/");
-        strcat(parts->fullpath, parts->page);
-    }
-
-    return parts;
-}
-
-static void free_url(URL *url)
-{
-    if (url->host != NULL)
-        curl_free(url->host);
-
-    if (url->path != NULL)
-    {
-        curl_free(url->path);
-    }
-    else
-    {
-        free(url->page);
-    }
-
-    if (url->query != NULL)
-        curl_free(url->query);
-
-    if (url->fullpath != NULL)
-        curl_free(url->fullpath);
-
-    free(url);
-}
-
 static int mkdir_bypass_exists(const char *path)
 {
     if (mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO) == -1)
@@ -216,7 +124,7 @@ static int mkdir_recurse(const char *path, int take_last)
 
 static void save_response(const char *url, const char *buffer, const char *prefix)
 {
-    URL *parts = parse_url(url);
+    URL *parts = url_parse(url);
 
     char *file_path = (char *)calloc(sizeof(char), strlen(prefix) + 1 + strlen(parts->fullpath) + 1);
     strcat(file_path, prefix);
@@ -231,7 +139,7 @@ static void save_response(const char *url, const char *buffer, const char *prefi
     }
 
     free(file_path);
-    free_url(parts);
+    url_free(parts);
 }
 
 Vector *crawl(const char *url, CrawlConfig config, Vector *visited)

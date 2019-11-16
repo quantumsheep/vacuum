@@ -135,7 +135,7 @@ static void save_response(const char *url, const char *buffer, const char *prefi
 
     if (!parallel_file_write(file_path, "w", buffer))
     {
-        printf("Failed to write the file: '%s'.\n", file_path);
+        printf("Failed to write the file: '%s' (%s).\n", file_path, strerror(errno));
     }
 
     free(file_path);

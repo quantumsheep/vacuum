@@ -81,9 +81,9 @@ static CrawlConfig generate_crawl_config(const ConfigAction *action)
         time(&timer);
         tm_info = localtime(&timer);
 
-        config.storage_directory = (char *)calloc(sizeof(char), sizeof(base_prefix) + 11 + 1);
+        config.storage_directory = (char *)calloc(sizeof(char), (sizeof(base_prefix) - 1) + 11 + 1);
         strcat(config.storage_directory, base_prefix);
-        strftime((config.storage_directory + sizeof(base_prefix) - 1), 11, "-%Y-%m-%d", tm_info);
+        strftime((config.storage_directory + sizeof(base_prefix) - 1), 12, "-%Y-%m-%d", tm_info);
     }
     else
     {

@@ -51,7 +51,7 @@ size_t vector_push_ref(Vector *vec, void *ptr)
 
 size_t vector_push(Vector *vec, const void *value, size_t size)
 {
-    void *ptr = (void *)calloc(sizeof(void), size);
+    void *ptr = (void *)calloc(sizeof(uint8_t), size);
     memcpy(ptr, value, size);
 
     return vector_push_ref(vec, ptr);

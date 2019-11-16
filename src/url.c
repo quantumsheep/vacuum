@@ -62,10 +62,6 @@ URL *url_parse(const char *url)
         }
     }
 
-    puts(parts->host);
-    puts(parts->path);
-    puts(parts->query);
-
     if (parts->path == NULL || (strcmp(parts->path, "/") == 0))
     {
         const char base[] = "index.html";

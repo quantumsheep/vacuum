@@ -45,7 +45,8 @@ HttpResponse http_get(const char *url)
     struct buffer_t buffer = init_buffer();
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
 
     curl_easy_setopt(curl, CURLINFO_RESPONSE_CODE, &response.status);
 

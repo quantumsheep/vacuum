@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct buffer_t Buffer;
 struct buffer_t
 {
     char *bytes;
@@ -11,17 +12,19 @@ struct buffer_t
     size_t capacity;
 };
 
-static struct buffer_t init_buffer()
+static Buffer *buffer_init()
 {
-    struct buffer_t buffer;
+    Buffer *buffer = (Buffer *)malloc(sizeof(Buffer));
 
-    buffer.bytes = calloc(sizeof(char), 0 + 1);
-    buffer.len = 0;
+    *buffer = (Buffer){
+        .bytes = (char *)calloc(sizeof(char), 0 + 1),
+        .len = 0,
+    };
 
     return buffer;
 }
 
-static size_t write_buffer(void *ptr, size_t size, size_t nmemb, struct buffer_t *buffer)
+static size_t write_buffer(void *ptr, size_t size, size_t nmemb, Buffer *buffer)
 {
     size_t nbytes = size * nmemb;
 
@@ -29,6 +32,8 @@ static size_t write_buffer(void *ptr, size_t size, size_t nmemb, struct buffer_t
 
     memcpy(buffer->bytes + buffer->len, ptr, nbytes);
     buffer->len += nbytes;
+
+    buffer->bytes[buffer->len] = '\0';
 
     return nbytes;
 }
@@ -42,16 +47,26 @@ HttpResponse http_get(const char *url)
         .buffer = NULL,
     };
 
-    struct buffer_t buffer = init_buffer();
+    Buffer *buffer = buffer_init();
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
-
-    curl_easy_setopt(curl, CURLINFO_RESPONSE_CODE, &response.status);
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_buffer);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, buffer);
+    curl_easy_setopt(curl, CURLOPT_PRIVATE, buffer);
+
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20L);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 10L);
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2L);
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
+    curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "crawler");
+    curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+    curl_easy_setopt(curl, CURLOPT_UNRESTRICTED_AUTH, 1L);
+    curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+    curl_easy_setopt(curl, CURLOPT_EXPECT_100_TIMEOUT_MS, 0L);
 
     CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK)
@@ -60,11 +75,14 @@ HttpResponse http_get(const char *url)
     }
     else
     {
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response.status);
         curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &response.content_type);
     }
 
     curl_easy_cleanup(curl);
 
-    response.buffer = buffer.bytes;
+    response.buffer = buffer->bytes;
+    free(buffer);
+
     return response;
 }

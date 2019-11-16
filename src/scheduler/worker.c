@@ -52,7 +52,7 @@ static void worker_thread(volatile Worker *worker)
 void worker_run(Worker *worker)
 {
     worker->running = 1;
-    pthread_create(&worker->thread, NULL, (void *)worker_thread, (void *)worker);
+    pthread_create(&worker->thread, NULL, (void *(*)(void *))worker_thread, (void *)worker);
 }
 
 void worker_stop(Worker *worker)

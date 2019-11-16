@@ -13,6 +13,6 @@ struct crawl_config_t
     char *storage_directory;
 };
 
-Vector *crawl(const char *url, CrawlConfig config, Vector *visited);
+Vector *crawl(const char *url, CrawlConfig config);
 
 #endif

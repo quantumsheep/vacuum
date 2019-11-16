@@ -142,7 +142,7 @@ static void save_response(const char *url, const char *buffer, const char *prefi
     url_free(parts);
 }
 
-Vector *crawl(const char *url, CrawlConfig config, Vector *visited)
+static void crawl_recursive(const char *url, CrawlConfig config, Vector *visited)
 {
     log_print_timed("[Depth %d] Crawled %s\n", config.max_depth, url);
 
@@ -154,11 +154,6 @@ Vector *crawl(const char *url, CrawlConfig config, Vector *visited)
         if (config.types == NULL || vector_includes_string_n(config.types, res.content_type, limit))
         {
             save_response(url, res.buffer, config.storage_directory);
-        }
-
-        if (visited == NULL)
-        {
-            visited = vector_init();
         }
 
         vector_push_string(visited, url);
@@ -176,7 +171,7 @@ Vector *crawl(const char *url, CrawlConfig config, Vector *visited)
 
                 if (!url_already_visited(visited, url))
                 {
-                    crawl(url, config, visited);
+                    crawl_recursive(url, config, visited);
                 }
             }
         }
@@ -185,6 +180,12 @@ Vector *crawl(const char *url, CrawlConfig config, Vector *visited)
             free(res.buffer);
         }
     }
+}
+
+Vector *crawl(const char *url, CrawlConfig config)
+{
+    Vector *visited = vector_init();
+    crawl_recursive(url, config, visited);
 
     return visited;
 }

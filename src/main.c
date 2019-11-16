@@ -106,7 +106,7 @@ void run_action(const char *name)
 
     log_print_timed("[%s] Crawling %s\n", name, action->url);
 
-    Vector *visited = crawl(action->url, config, NULL);
+    Vector *visited = crawl(action->url, config);
     vector_free(visited, VECTOR_FREE_REFERENCE);
 
     free(config.storage_directory);

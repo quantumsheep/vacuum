@@ -168,6 +168,7 @@ Vector *crawl(const char *url, CrawlConfig config, Vector *visited)
             config.max_depth--;
 
             Vector *urls = get_urls(res.buffer);
+            free(res.buffer);
 
             for (size_t i = 0; i < urls->length; i++)
             {
@@ -178,6 +179,10 @@ Vector *crawl(const char *url, CrawlConfig config, Vector *visited)
                     crawl(url, config, visited);
                 }
             }
+        }
+        else
+        {
+            free(res.buffer);
         }
     }
 

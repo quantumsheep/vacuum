@@ -48,12 +48,12 @@ URL *url_parse(const char *url)
 
     const char *path = strchr(url, '/');
 
-    parts->host = substr(url, path != NULL ? (path - url) : strlen(url));
+    parts->host = substr(url, path != NULL ? ((size_t)(path - url)) : strlen(url));
 
     if (path != NULL)
     {
         const char *query = strchr(path, '?');
-        parts->path = substr(path, parts->query != NULL ? (parts->query - path) : strlen(path));
+        parts->path = substr(path, parts->query != NULL ? ((size_t)(parts->query - path)) : strlen(path));
 
         if (query != NULL)
         {

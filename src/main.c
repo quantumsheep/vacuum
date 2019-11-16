@@ -6,9 +6,9 @@
 #include "scheduler.h"
 
 #include <ctype.h>
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <signal.h>
 
 static Config config;
 static Vector *workers = NULL;
@@ -161,7 +161,7 @@ int main()
         for (size_t i = 0; i < task->actions->length; i++)
         {
             char *action = vector_get(task->actions, i);
-            Job *job = job_init((void *)run_action, action);
+            Job *job = job_init((void (*)(void *))run_action, action);
 
             worker_add(worker, job);
         }

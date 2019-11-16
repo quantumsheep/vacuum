@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 
 static Config config;
 static Vector *workers = NULL;
@@ -111,7 +112,7 @@ void run_action(const char *name)
     free(config.storage_directory);
 }
 
-void on_exit()
+static void on_sigint_exit()
 {
     for (size_t i = 0; i < workers->length; i++)
     {
@@ -143,7 +144,7 @@ int main()
     // }
 
     workers = vector_init();
-    signal(SIGINT, on_exit);
+    signal(SIGINT, on_sigint_exit);
 
     /**
      * Start all the tasks

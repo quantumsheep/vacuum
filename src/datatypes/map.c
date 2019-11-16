@@ -1,5 +1,6 @@
 #include "map.h"
 
+#include <stdint.h>
 #include <string.h>
 
 Map *map_init()

@@ -42,7 +42,10 @@ static pthread_mutex_t *file_mutex(const char *path)
 int parallel_file_vwrite(const char *path, const char *mode, const char *fmt, va_list args)
 {
     pthread_mutex_t *lock = file_mutex(path);
-    
+
+    if (lock == NULL)
+        return 0;
+
     int passed = 0;
 
     pthread_mutex_lock(lock);

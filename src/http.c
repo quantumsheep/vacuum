@@ -17,7 +17,7 @@ static Buffer *buffer_init()
     Buffer *buffer = (Buffer *)malloc(sizeof(Buffer));
 
     *buffer = (Buffer){
-        .bytes = (char *)calloc(sizeof(char), 0 + 1),
+        .bytes = NULL,
         .len = 0,
     };
 

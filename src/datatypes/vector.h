@@ -27,12 +27,12 @@ void vector_concat(Vector *destination, const Vector *source);
 int vector_includes_string(const Vector *vec, const char *str);
 int vector_includes_string_n(const Vector *vec, const char *str, size_t size);
 
-typedef enum vector_delete_mode_t VectorDeleteMode;
 enum vector_delete_mode_t
 {
     VECTOR_KEEP_REFERENCE,
     VECTOR_FREE_REFERENCE,
 };
+typedef enum vector_delete_mode_t VectorDeleteMode;
 
 void vector_remove(Vector *vec, size_t index, VectorDeleteMode mode);
 

@@ -31,12 +31,12 @@ void map_set(Map *map, const char *key, const void *value, size_t size);
 void map_set_string(Map *map, const char *key, const char *value);
 void map_set_int(Map *map, const char *key, int value);
 
-typedef enum map_delete_mode_t MapDeleteMode;
 enum map_delete_mode_t
 {
     MAP_KEEP_REFERENCE,
     MAP_FREE_REFERENCE,
 };
+typedef enum map_delete_mode_t MapDeleteMode;
 
 void map_remove(Map *map, const char *key, MapDeleteMode mode);
 

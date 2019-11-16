@@ -4,12 +4,12 @@
 #include "datatypes/map.h"
 #include "datatypes/vector.h"
 
-typedef enum config_option_type_t ConfigOptionType;
 enum config_option_type_t
 {
     CONFIG_OPTION_STRING,
     CONFIG_OPTION_ARRAY,
 };
+typedef enum config_option_type_t ConfigOptionType;
 
 typedef union config_option_value_t ConfigOptionValue;
 union config_option_value_t {
@@ -49,7 +49,6 @@ struct config_t
     Map *tasks;   // Map<ConfigTask>
 };
 
-typedef enum config_token_type_t ConfigTokenType;
 enum config_token_type_t
 {
     TOKEN_ACTION,          // =
@@ -63,6 +62,7 @@ enum config_token_type_t
     TOKEN_SEPARATOR,       // +
     TOKEN_STRING,          // any string
 };
+typedef enum config_token_type_t ConfigTokenType;
 
 typedef struct config_token_item_t ConfigToken;
 struct config_token_item_t

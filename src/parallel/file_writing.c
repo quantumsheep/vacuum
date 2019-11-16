@@ -11,7 +11,7 @@ Map *actives = NULL; // Map<char *, pthread_mutex_t *>
 
 static pthread_mutex_t *file_mutex(const char *path)
 {
-    static pthread_mutex_t loading;
+    static pthread_mutex_t loading = PTHREAD_MUTEX_INITIALIZER;
 
     pthread_mutex_lock(&loading);
 
@@ -34,7 +34,7 @@ static pthread_mutex_t *file_mutex(const char *path)
         }
     }
 
-    pthread_mutex_lock(&loading);
+    pthread_mutex_unlock(&loading);
 
     return mutex;
 }
@@ -42,7 +42,7 @@ static pthread_mutex_t *file_mutex(const char *path)
 int parallel_file_vwrite(const char *path, const char *mode, const char *fmt, va_list args)
 {
     pthread_mutex_t *lock = file_mutex(path);
-
+    
     int passed = 0;
 
     pthread_mutex_lock(lock);

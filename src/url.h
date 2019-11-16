@@ -12,6 +12,8 @@ struct url_t
     char *fullpath;
 };
 
+URL *url_init();
+
 URL *url_parse(const char *url);
 
 void url_free(URL *url);

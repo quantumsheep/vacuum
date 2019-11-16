@@ -6,22 +6,65 @@
 #include <stdlib.h>
 #include <string.h>
 
+URL *url_init()
+{
+    URL *url = malloc(sizeof(URL));
+
+    *url = (URL){
+        .host = NULL,
+        .path = NULL,
+        .page = NULL,
+        .query = NULL,
+
+        .fullpath = NULL,
+    };
+
+    return url;
+}
+
+static char *substr(const char *str, size_t size)
+{
+    char *sub = (char *)calloc(sizeof(char), size + 1);
+    strncpy(sub, str, size);
+
+    return sub;
+}
+
 URL *url_parse(const char *url)
 {
-    CURLU *cut = curl_url();
-    CURLUcode rc = curl_url_set(cut, CURLUPART_URL, url, 0);
+    URL *parts = url_init();
 
-    if (rc)
+    const char http[] = "http://";
+    const char https[] = "https://";
+
+    if (strncmp(url, http, sizeof(http) - 1) == 0)
     {
-        return NULL;
+        url += sizeof(http) - 1;
+    }
+    else if (strncmp(url, https, sizeof(https) - 1) == 0)
+    {
+        url += sizeof(https) - 1;
     }
 
-    URL *parts = malloc(sizeof(URL));
+    const char *path = strchr(url, '/');
 
-    curl_url_get(cut, CURLUPART_HOST, &parts->host, 0);
-    curl_url_get(cut, CURLUPART_PATH, &parts->path, 0);
-    curl_url_get(cut, CURLUPART_QUERY, &parts->query, 0);
-    curl_url_cleanup(cut);
+    parts->host = substr(url, path != NULL ? (path - url) : strlen(url));
+
+    if (path != NULL)
+    {
+        const char *query = strchr(path, '?');
+        parts->path = substr(path, parts->query != NULL ? (parts->query - path) : strlen(path));
+
+        if (query != NULL)
+        {
+            parts->query = (char *)calloc(sizeof(char), strlen(query) + 1);
+            strcpy(parts->query, query);
+        }
+    }
+
+    puts(parts->host);
+    puts(parts->path);
+    puts(parts->query);
 
     if (parts->path == NULL || (strcmp(parts->path, "/") == 0))
     {
@@ -68,11 +111,11 @@ URL *url_parse(const char *url)
 void url_free(URL *url)
 {
     if (url->host != NULL)
-        curl_free(url->host);
+        free(url->host);
 
     if (url->path != NULL)
     {
-        curl_free(url->path);
+        free(url->path);
     }
     else
     {
@@ -80,10 +123,10 @@ void url_free(URL *url)
     }
 
     if (url->query != NULL)
-        curl_free(url->query);
+        free(url->query);
 
     if (url->fullpath != NULL)
-        curl_free(url->fullpath);
+        free(url->fullpath);
 
     free(url);
 }

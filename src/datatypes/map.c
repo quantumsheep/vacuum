@@ -84,7 +84,7 @@ void map_set(Map *map, const char *key, const void *value, size_t size)
     void *ptr = (void *)calloc(sizeof(uint8_t), size);
     memcpy(ptr, value, size);
 
-    return map_set_ref(map, key, ptr);
+    map_set_ref(map, key, ptr);
 }
 
 void map_set_string(Map *map, const char *key, const char *value)

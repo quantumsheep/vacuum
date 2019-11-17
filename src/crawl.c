@@ -49,8 +49,18 @@ static Vector *get_urls(const URL *current, const char *page)
     Vector *needles = vector_init();
     vector_push_ref(needles, "https://");
     vector_push_ref(needles, "http://");
+
+    vector_push_ref(needles, "\'https://");
+    vector_push_ref(needles, "\'http://");
     vector_push_ref(needles, "'/");
+    vector_push_ref(needles, "'./");
+    vector_push_ref(needles, "'..");
+
+    vector_push_ref(needles, "\"https://");
+    vector_push_ref(needles, "\"http://");
     vector_push_ref(needles, "\"/");
+    vector_push_ref(needles, "\"./");
+    vector_push_ref(needles, "\"..");
 
     char *start = NULL;
     while ((start = find_str(page, needles)))
@@ -59,20 +69,16 @@ static Vector *get_urls(const URL *current, const char *page)
 
         if (start[0] == '"' || start[0] == '\'')
         {
+            if (start[2] != '\0' && !is_valid_url_char(start[2]))
+            {
+                page++;
+                continue;
+            }
+
             end = strchr(start + 1, start[0]);
             start++;
         }
-        else if (start != page)
-        {
-            char before = *(start - 1);
-
-            if (before == '"' || before == '\'')
-            {
-                end = strchr(start, before);
-            }
-        }
-
-        if (end == NULL)
+        else
         {
             for (end = start; is_valid_url_char(*end); end++)
             {

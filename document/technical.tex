@@ -1,0 +1,261 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\lstset{frame=tb,
+  language=C,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\begin{document}
+
+\title{Web Scrapper\\}
+
+\author{\IEEEauthorblockN{Nathanael Demacon}
+\IEEEauthorblockA{\textit{3ème année AL - Promo 2019} \\
+\textit{École Supérieur du Génie Informatique}\\
+Paris, France\\
+nathanael.dmc@outlook.fr}
+\and
+\IEEEauthorblockN{Océane Denis}
+\IEEEauthorblockA{\textit{3ème année AL - Promo 2019} \\
+\textit{École Supérieur du Génie Informatique}\\
+Paris, France\\
+oceane.marie.d@gmail.com}
+}
+\date{Novembre 2019}
+
+\maketitle
+
+\begin{abstract}
+Ce projet a pour but de créer un \textit{crawler} performant consommant le moins de mémoire vive possible. Il a été initié par l'École Supérieur du Génie Informatique en tant qu'épreuve dans le but de nous évaluer sur nos compétences du langage C.
+\end{abstract}
+
+\section{Introduction}
+
+Dans l'optique de résoudre les problèmes techniques et algorithmique de ce projet, il est nécéssaire d'adopter une vision purement théorique.
+Ce document a pour but de présenter les diverses problèmatiques recontrés ainsi que leur solution trouvée durant nos recherches. Ce document ne présentera en aucun cas la manière dont le programme sera utilisé d'un point de vu utilisateur (voir document d'utilisation).
+
+Pour appel, ceci est un projet d'études et ne constitue donc pas un projet de recherche en cas réel et n'est qu'un simple exercice de compréhension du langage C.
+
+\section{Fichier de configuration}
+
+Coeur du logiciel, le fichier de configuration va permettre de configurer le comportement de celui-ci en listant des \textit{Actions} et des \textit{Tâches}.
+
+Nous allons traiter ce fichier de configuration comme un langage de programmation.
+La syntaxe étant déjà établie par les coordinateurs du projet.
+
+Pour celà nous devons énumérer les différentes étapes de conception d'un langage de programmation \textit{basique}:
+\begin{enumerate}
+    \item Analyse syntaxique
+    \item \textit{Parsing}
+\end{enumerate}
+
+\subsection{Analyse syntaxique}
+
+Cette première étape consiste en la découpe des différentes composantes du langage en \textit{tokens}.
+On l'appelle aussi la tokénisation.
+
+Pour se faire nous devons définir chaque caractère ou chaîne de caractères à un identificateur précis.
+Par exemple dans le format du fichier de configuration, la chaîne de caractères \textit{->} équivaut à un séparateur entre le nom de l'option et sa valeur.
+Le caractère \textit{\=} quant à lui signifie une déclaration d'\textit{Action}.
+
+\subsection{Parsing}
+
+Aussi appellé \textit{Analyse sémantique}, le parsing est l'étape qui va transformer notre liste de \textit{Tokens} en un format utilisable, fréquemment un arbre syntaxique, \textit{Abstract Syntax Tree} en anglais.
+
+Dans notre cas nous n'allons pas utiliser d'arbre mais générer la structure \textit{Config} (voir partie \textit{Structures de données}).
+
+
+\section{Récupération des données HTTP}
+
+Pour récupérer les informations de chaque sites, et donc pouvoir récupérer les \textit{URLs} en référence, il nous faut envoyer une requête via le protocol HTTP.
+Nous utiliserons la bibliothèque \textit{CURL}, communément appellée \textit{libcurl}.
+
+Une fois les données récupérées, une recherche des \textit{URLs} sera effectuée sur le \textit{buffer}.
+Ces \textit{URLs} seront utilisées pour parcourir récursivement les autres sites.
+
+\section{Multi-threading}
+
+Rapidité, point fort de notre application, fonctionne sur plusieurs \textit{threads}.
+Nous utiliserons la biliothèque native \textit{pthread} (soit \textit{POSIX Thread}).
+
+Étant donné l'implication du nombre de requêtes \textit{I/O} envers les fichiers recevants chaque pages téléchargés, il est important de prévenir la concurrence envers différents threads sur un même fichier.
+Pour éviter un tel problème, l'utilisation des \textit{mutex} (verrou virtuel) sera omniprésent.
+
+\subsection{Scheduler}
+
+Pour faire fonctionner les \textit{Tâches} en parallèle et de lancer leurs \textit{Actions} à un temps donné, il nous faudra créer différents threads.
+
+Dans le cas actuel, un thread par \textit{Tâche} pour contrôler la temporisation des \textit{Actions} a été mise en place.
+Ensuite un thread par \textit{Action} dans l'intervale donnée.
+
+
+\section{Structures de données}
+
+\subsection{Vecteur}
+
+Comme définits dans le langage C, la gestion de tableaux est fastidieuse, notamment dûe à l'allocation \textit{manuelle} de mémoire.
+Une solution pour palier à ce problème serait d'avoir une structure qui s'agrandirait sans intervention du dévelopeur par rapport à la mémoire.
+Hors, c'est exactement pour celà qu'a été créé la structure \textit{Vector} (fr. \textit{Vecteur}).
+
+\begin{lstlisting}
+    typedef struct vector_t Vector;
+    struct vector_t
+    {
+        size_t length;
+        size_t capacity;
+
+        void **values;
+    };
+\end{lstlisting}
+
+Étant donné le manque de programmation orienté object dans le langage C, nous allons devoir passer par des fonctions pour contrôler cette structure.
+Toute les fonctions relatives aux Vecteurs sont nommés commençants par \textit{vector\_}.
+
+
+\subsection{Map / Dictionnaire}
+
+Les maps, aussi appelés dictionnaires, sont prévues pour recevoir n'importe quelle données qui sera symbolisée par une clé.
+La clé faisant office d'identification pour facilement récupérer la donnée stockée.
+
+\begin{lstlisting}
+    typedef struct map_node_t MapNode;
+    struct map_node_t
+    {
+        char *key;
+        void *value;
+    
+        MapNode *prev;
+        MapNode *next;
+    };
+    
+    typedef struct map_t Map;
+    struct map_t
+    {
+        MapNode *first;
+    };
+\end{lstlisting}
+
+La structure est basée sur le principe de \textit{liste doublement chainée}, ce qui en fait un type facilement parcourable et modifiable.
+Cette méthode permet aussi de limiter l'utilisation de la mémoire (contrairement à la structure \textit{Vecteur}).
+
+
+\subsection{Configuration}
+
+Pour stocker le fichier de configuration nous devons d'abbord énumérer ses différentes parties ainsi que leur composantes:
+
+\begin{itemize}
+    \item Actions
+    \begin{itemize}
+        \item Nom (chaîne) [obligatoire]
+        \item URL (chaîne) [obligatoire]
+        \item Options [optionel]
+        \begin{itemize}
+            \item max-depth (entier)
+            \item versioning (chaîne)
+            \item types (liste)
+            \item max-buffer (entier)
+        \end{itemize}
+    \end{itemize}
+    \item Tâches
+    \begin{itemize}
+        \item Nom (chaîne)
+        \item secondes (entier)
+        \item minutes (entier)
+        \item heures (entier)
+        \item actions (liste)
+    \end{itemize}
+\end{itemize}
+
+La structure de donnée \textit{Map} convient parfaitement à la propriétée \textit{Options} ainsi qu'au stockage des \textit{Actions} et des \textit{Tâches}, ces derniers identifiés par un nom (une clé et une valeur).
+Pour la propriétée \textit{Options}, il faudra aussi séparer les chaînes de caractère, les entiers et les listes. Pour se faire nous allons utiliser une \textit{union} ainsi qu'un \textit{enum}.
+
+\break
+\begin{lstlisting}
+    enum config_option_type_t
+    {
+        CONFIG_OPTION_STRING,
+        CONFIG_OPTION_ARRAY,
+    };
+    typedef enum config_option_type_t ConfigOptionType;
+    
+    typedef union config_option_value_t ConfigOptionValue;
+    union config_option_value_t {
+        char *str;
+        Vector *arr;
+    };
+
+    typedef struct config_option_t ConfigOption;
+    struct config_option_t
+    {
+        ConfigOptionType type;
+        ConfigOptionValue value;
+    };
+
+    typedef struct config_action_t ConfigAction;
+    struct config_action_t
+    {
+        char *url;
+    
+        Map *options; // Map<ConfigOption>
+    };
+
+    typedef struct config_task_t ConfigTask;
+    struct config_task_t
+    {
+        int hours;
+        int minutes;
+        int seconds;
+    
+        Vector *actions; // Vector<char *>
+    };
+\end{lstlisting}
+
+Le vecteur des actions pour les \textit{Tâches} pourra être utiliser avec le dictionnaire des \textit{Actions} présent dans la structure \textit{Config} présente ci-dessous.
+
+\begin{lstlisting}
+    typedef struct config_t Config;
+    struct config_t
+    {
+        Map *actions; // Map<ConfigAction>
+        Map *tasks;   // Map<ConfigTask>
+    };
+\end{lstlisting}
+
+\section{Références}
+
+\begin{enumerate}
+    \item \textit{Page Github} - \href{https://github.com/quantumsheep/webscrapper-esgi}{github.com/quantumsheep/webscrapper-esgi}.
+    \item \textit{CURL} - \href{https://curl.haxx.se/}{curl.haxx.se}.
+    \item \textit{libcurl} - \href{https://curl.haxx.se/libcurl/}{curl.haxx.se/libcurl}.
+    \item \textit{POSIX Thread} - \href{https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/\\pthread.h.html}{pubs.opengroup.org/onlinepubs/9699919799/bas\\edefs/pthread.h.html}.
+\end{enumerate}
+
+\end {document}

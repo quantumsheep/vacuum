@@ -184,10 +184,18 @@ static int mkdir_recurse(const char *path, int take_last)
 
 static void save_response(const URL *url, const char *buffer, const char *prefix)
 {
-    char *file_path = (char *)calloc(sizeof(char), strlen(prefix) + 1 + strlen(url->fullpath) + 1);
+    char *encoded_query = NULL;
+
+    if (url->query != NULL)
+        encoded_query = url_query_encode(url->query);
+
+    char *file_path = (char *)calloc(sizeof(char), strlen(prefix) + 1 + strlen(url->fullpath) + (encoded_query != NULL ? strlen(encoded_query) : 0) + 1);
     strcat(file_path, prefix);
     strcat(file_path, "/");
     strcat(file_path, url->fullpath);
+
+    if (encoded_query != NULL)
+        strcat(file_path, encoded_query);
 
     mkdir_recurse(file_path, 0);
 
@@ -195,6 +203,9 @@ static void save_response(const URL *url, const char *buffer, const char *prefix
     {
         printf("Failed to write the file: '%s' (%s).\n", file_path, strerror(errno));
     }
+
+    if (encoded_query != NULL)
+        free(encoded_query);
 
     free(file_path);
 }

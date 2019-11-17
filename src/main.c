@@ -27,6 +27,8 @@ static CrawlConfig generate_crawl_config(const ConfigAction *action)
     ConfigOption *versioning_option = (ConfigOption *)map_get_value(action->options, "versioning");
     ConfigOption *type_option = (ConfigOption *)map_get_value(action->options, "type");
 
+    ConfigOption *max_buffer_option = (ConfigOption *)map_get_value(action->options, "max-buffer");
+
     static char base_prefix[] = "data";
 
     CrawlConfig config = (CrawlConfig){
@@ -34,8 +36,22 @@ static CrawlConfig generate_crawl_config(const ConfigAction *action)
         .versioning = 0,
         .types = NULL,
 
+        .max_buffer = 0,
+
         .storage_directory = NULL,
     };
+
+    if (max_depth_option != NULL)
+    {
+        if (max_depth_option->type == CONFIG_OPTION_STRING && is_number(max_depth_option->value.str))
+        {
+            config.max_depth = atoi(max_depth_option->value.str);
+        }
+        else
+        {
+            puts("Option 'max-depth' must be a valid number.");
+        }
+    }
 
     if (versioning_option != NULL)
     {
@@ -61,15 +77,15 @@ static CrawlConfig generate_crawl_config(const ConfigAction *action)
         }
     }
 
-    if (max_depth_option != NULL)
+    if (max_buffer_option != NULL)
     {
-        if (max_depth_option->type == CONFIG_OPTION_STRING && is_number(max_depth_option->value.str))
+        if (max_buffer_option->type == CONFIG_OPTION_STRING && is_number(max_buffer_option->value.str))
         {
-            config.max_depth = atoi(max_depth_option->value.str);
+            config.max_buffer = (unsigned long)atol(max_buffer_option->value.str);
         }
         else
         {
-            puts("Option 'max-depth' must be a valid number.");
+            puts("Option 'max-buffer' must be a valid number.");
         }
     }
 

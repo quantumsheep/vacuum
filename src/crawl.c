@@ -221,8 +221,9 @@ static void crawl_recursive(const char *url, CrawlConfig config, Vector *visited
     log_print_timed("[Depth %d] Crawled %s\n", config.max_depth, url);
 
     HttpResponse res = http_get(url);
+    vector_push_string(visited, url);
 
-    if (res.buffer == NULL)
+    if (res.buffer == NULL || (config.max_buffer > 0 && res.buffer_size > config.max_buffer))
         return;
 
     URL *parsed_url = url_parse(url);
@@ -231,8 +232,6 @@ static void crawl_recursive(const char *url, CrawlConfig config, Vector *visited
     {
         save_response(parsed_url, res.buffer, config.storage_directory);
     }
-
-    vector_push_string(visited, url);
 
     Vector *urls = get_urls(parsed_url, res.buffer);
     url_free(parsed_url);

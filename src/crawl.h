@@ -10,6 +10,8 @@ struct crawl_config_t
     int versioning;
     Vector *types;
 
+    size_t max_buffer;
+
     char *storage_directory;
 };
 

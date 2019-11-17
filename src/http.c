@@ -45,6 +45,7 @@ HttpResponse http_get(const char *url)
     HttpResponse response = (HttpResponse){
         .content_type = NULL,
         .buffer = NULL,
+        .buffer_size = 0,
     };
 
     Buffer *buffer = buffer_init();
@@ -82,6 +83,8 @@ HttpResponse http_get(const char *url)
     curl_easy_cleanup(curl);
 
     response.buffer = buffer->bytes;
+    response.buffer_size = buffer->len;
+
     free(buffer);
 
     return response;

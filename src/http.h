@@ -12,6 +12,7 @@ struct http_response_t
     int status;
     char *content_type;
     char *buffer;
+    size_t buffer_size;
 };
 
 HttpResponse http_get(const char *url);

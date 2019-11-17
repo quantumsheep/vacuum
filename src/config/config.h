@@ -1,8 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "datatypes/map.h"
-#include "datatypes/vector.h"
+#include "../datatypes/map.h"
+#include "../datatypes/vector.h"
 
 enum config_option_type_t
 {
@@ -79,14 +79,17 @@ ConfigOption *config_option_init_array(Vector *vec);
 ConfigAction *config_action_init(const char *url, Map *options);
 ConfigTask *config_task_init(int hours, int minutes, int seconds, Vector *actions);
 
-Config config_load(const char *path, int *has_error);
-Config config_parse(Vector *tokens, int *has_error);
+Config *config_init();
+Config *config_load(const char *path, int *has_error);
+Config *config_parse(Vector *tokens, int *has_error);
 
 ConfigToken *config_create_token(ConfigTokenType type, char *value, int line, int copy_has_ref);
 Vector *config_tokenize(const char *path, int *has_error);
 
 void config_action_free(ConfigAction *action);
 void config_task_free(ConfigTask *task);
-void config_free(Config config);
+void config_free(Config *config);
+
+void config_print(Config *config);
 
 #endif

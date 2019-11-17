@@ -1,4 +1,6 @@
-#include "../config.h"
+#include "config.h"
+
+#include "../datatypes/map.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -54,4 +56,14 @@ ConfigTask *config_task_init(int hours, int minutes, int seconds, Vector *action
     task->actions = actions;
 
     return task;
+}
+
+Config *config_init()
+{
+    Config *config = (Config *)malloc(sizeof(Config));
+
+    config->actions = map_init();
+    config->tasks = map_init();
+
+    return config;
 }

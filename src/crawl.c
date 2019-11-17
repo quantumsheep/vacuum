@@ -1,6 +1,6 @@
 #include "crawl.h"
 
-#include "config.h"
+#include "config/config.h"
 #include "file.h"
 #include "http.h"
 #include "log.h"

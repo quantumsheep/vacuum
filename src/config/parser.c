@@ -1,4 +1,4 @@
-#include "../config.h"
+#include "config.h"
 
 #include <stdio.h>
 
@@ -227,12 +227,9 @@ static void parse_task(Map *tasks, Vector *tokens, size_t *index, int *has_error
     *index = i;
 }
 
-Config config_parse(Vector *tokens, int *has_error)
+Config *config_parse(Vector *tokens, int *has_error)
 {
-    Config config;
-
-    config.actions = map_init();
-    config.tasks = map_init();
+    Config *config = config_init();
 
     for (size_t i = 0; i < tokens->length; i++)
     {
@@ -245,12 +242,12 @@ Config config_parse(Vector *tokens, int *has_error)
 
         if (token->type == TOKEN_ACTION)
         {
-            parse_action(config.actions, tokens, &i, has_error);
+            parse_action(config->actions, tokens, &i, has_error);
             i--;
         }
         else if (token->type == TOKEN_TASK)
         {
-            parse_task(config.tasks, tokens, &i, has_error);
+            parse_task(config->tasks, tokens, &i, has_error);
             i--;
         }
         else

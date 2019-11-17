@@ -1,4 +1,4 @@
-#include "config.h"
+#include "config/config.h"
 #include "crawl.h"
 #include "datatypes/vector.h"
 #include "file.h"
@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static Config config;
+static Config *config = NULL;
 static Vector *workers = NULL;
 
 static int is_number(const char *str)
@@ -112,7 +112,7 @@ static CrawlConfig generate_crawl_config(const ConfigAction *action)
 
 void run_action(const char *name)
 {
-    MapNode *node = map_get(config.actions, name);
+    MapNode *node = map_get(config->actions, name);
 
     if (node == NULL)
         return;
@@ -149,17 +149,9 @@ int main()
     config = config_load("config.sconf", &has_error);
 
     if (has_error)
-    {
         return 1;
-    }
 
-    /**
-     * Launch all the actions one by one
-     */
-    // for (MapNode *node = config.actions->first; node != NULL; node = node->next)
-    // {
-    //     run_action(node->key);
-    // }
+    config_print(config);
 
     workers = vector_init();
     signal(SIGINT, on_sigint_exit);
@@ -167,7 +159,7 @@ int main()
     /**
      * Start all the tasks
      */
-    for (MapNode *node = config.tasks->first; node != NULL; node = node->next)
+    for (MapNode *node = config->tasks->first; node != NULL; node = node->next)
     {
         ConfigTask *task = (ConfigTask *)node->value;
 

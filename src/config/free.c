@@ -1,4 +1,4 @@
-#include "../config.h"
+#include "config.h"
 
 void config_action_free(ConfigAction *action)
 {
@@ -25,10 +25,10 @@ void config_task_free(ConfigTask *task)
     free(task);
 }
 
-void config_free(Config config)
+void config_free(Config *config)
 {
     {
-        MapNode *node = config.actions->first;
+        MapNode *node = config->actions->first;
 
         while (node != NULL)
         {
@@ -38,11 +38,11 @@ void config_free(Config config)
             node = node->next;
         }
 
-        map_free(config.actions, MAP_KEEP_REFERENCE);
+        map_free(config->actions, MAP_KEEP_REFERENCE);
     }
 
     {
-        MapNode *node = config.tasks->first;
+        MapNode *node = config->tasks->first;
 
         while (node != NULL)
         {
@@ -52,6 +52,8 @@ void config_free(Config config)
             node = node->next;
         }
 
-        map_free(config.tasks, MAP_KEEP_REFERENCE);
+        map_free(config->tasks, MAP_KEEP_REFERENCE);
     }
+
+    free(config);
 }

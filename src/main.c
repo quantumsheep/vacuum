@@ -1,9 +1,9 @@
 #include "config/config.h"
-#include "crawl.h"
 #include "datatypes/vector.h"
-#include "file.h"
-#include "log.h"
-#include "scheduler.h"
+#include "http/crawl.h"
+#include "scheduler/scheduler.h"
+#include "utils/file.h"
+#include "utils/log.h"
 
 #include <ctype.h>
 #include <signal.h>

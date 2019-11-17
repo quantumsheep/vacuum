@@ -1,6 +1,6 @@
 #include "log.h"
 
-#include "parallel/file_writing.h"
+#include "../parallel/file_writing.h"
 
 #include <stdarg.h>
 #include <stdio.h>

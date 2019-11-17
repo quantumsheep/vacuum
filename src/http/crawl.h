@@ -1,7 +1,7 @@
 #ifndef CRAWL_H
 #define CRAWL_H
 
-#include "datatypes/vector.h"
+#include "../datatypes/vector.h"
 
 typedef struct crawl_config_t CrawlConfig;
 struct crawl_config_t

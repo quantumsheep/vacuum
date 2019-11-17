@@ -1,10 +1,10 @@
 #include "crawl.h"
 
-#include "config/config.h"
-#include "file.h"
+#include "../config/config.h"
+#include "../parallel/file_writing.h"
+#include "../utils/file.h"
+#include "../utils/log.h"
 #include "http.h"
-#include "log.h"
-#include "parallel/file_writing.h"
 #include "url.h"
 
 #include <errno.h>

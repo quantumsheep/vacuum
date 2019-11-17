@@ -4,7 +4,7 @@
 #define CURL_STATICLIB
 #include <curl/curl.h>
 
-#include "datatypes/map.h"
+#include "../datatypes/map.h"
 
 typedef struct http_response_t HttpResponse;
 struct http_response_t

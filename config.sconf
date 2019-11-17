@@ -1,19 +1,34 @@
 =
-{name -> Test Crawl}
-{url -> https://google.fr}
-+
-{option1 -> value1}
-{option2 -> value2}
-
-=
-{name -> Test Crawl 2}
+{name -> myges}
 {url -> https://myges.fr}
 +
-{max-depth -> 5}
-{type -> (text/html, text/javascript)}
+{max-depth -> 2}
+{versioning -> on}
+
+=
+{name -> qtmsheep}
+{url -> https://qtmsheep.com}
++
+{max-depth -> 1}
+{max-buffer -> 300000}
+
+=
+{name -> schooding}
+{url -> https://schooding.com}
++
+{max-depth -> 1}
+{max-buffer -> 200000}
+{type -> (text/javascript, text/css)}
 
 ==
-{name -> Test Task}
-{minute -> 1}
+{name -> ESGI}
+{minute -> 3}
+{second -> 20}
 +
-(Test Crawl)
+(myges, schooding)
+
+==
+{name -> Portfolio}
+{second -> 30}
++
+(qtmsheep)

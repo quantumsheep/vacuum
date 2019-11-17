@@ -64,19 +64,9 @@ URL *url_parse(const char *url)
         }
     }
 
-    if (parts->path == NULL || (strcmp(parts->path, "/") == 0))
-    {
-        const char base[] = "index.html";
-        parts->page = (char *)calloc(sizeof(char), sizeof(base) + 1);
-        strcpy(parts->page, base);
-    }
-    else
-    {
-        char *last = strrchr(parts->path, '/');
-        last[0] = '\0';
-
-        parts->page = last + 1;
-    }
+    const char base[] = "index.html";
+    parts->page = (char *)calloc(sizeof(char), sizeof(base) + 1);
+    strcpy(parts->page, base);
 
     size_t size = 0;
 
@@ -104,6 +94,43 @@ URL *url_parse(const char *url)
     }
 
     return parts;
+}
+
+char *url_query_encode(const char *query)
+{
+    size_t size = 0;
+    size_t capacity = strlen(query);
+    char *filename = (char *)calloc(sizeof(char), (capacity * 3) + 1);
+
+    while (*query != '\0')
+    {
+        switch (*query)
+        {
+        case '\\':
+        case '/':
+        case '?':
+        case '%':
+        case ':':
+        case '*':
+        case '"':
+        case '<':
+        case '>':
+        case '|':
+        case '.':
+        case ' ':
+            sprintf(filename + size, "%%%X", *query);
+            size += 3;
+            break;
+        default:
+            filename[size++] = *query;
+        }
+
+        query++;
+    }
+
+    filename = realloc(filename, size + 1);
+
+    return filename;
 }
 
 void url_free(URL *url)

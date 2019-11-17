@@ -4,6 +4,7 @@
 typedef struct url_t URL;
 struct url_t
 {
+    char *protocol;
     char *host;
     char *path;
     char *page;

@@ -39,10 +39,12 @@ URL *url_parse(const char *url)
 
     if (strncmp(url, http, sizeof(http) - 1) == 0)
     {
+        parts->protocol = strdup(http);
         url += sizeof(http) - 1;
     }
     else if (strncmp(url, https, sizeof(https) - 1) == 0)
     {
+        parts->protocol = strdup(https);
         url += sizeof(https) - 1;
     }
 
@@ -106,6 +108,9 @@ URL *url_parse(const char *url)
 
 void url_free(URL *url)
 {
+    if (url->protocol != NULL)
+        free(url->protocol);
+
     if (url->host != NULL)
         free(url->host);
 

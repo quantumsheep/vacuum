@@ -130,6 +130,8 @@ void run_action(const char *name)
 
 static void on_sigint_exit()
 {
+    puts("SIGINT received - The program will stop once each thread are stopped.");
+
     for (size_t i = 0; i < workers->length; i++)
     {
         Worker *worker = (Worker *)vector_get(workers, i);

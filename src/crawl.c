@@ -23,16 +23,46 @@ static int is_valid_url_char(char c)
     return c != '\0' && (is_alphanum || is_special_char || is_query_char);
 }
 
-static Vector *get_urls(const char *page)
+static char *find_str(const char *str, const Vector *needles)
+{
+    while (*str != '\0')
+    {
+        for (size_t i = 0; i < needles->length; i++)
+        {
+            char *needle = (char *)vector_get(needles, i);
+            if (strncmp(str, needle, strlen(needle)) == 0)
+            {
+                return (char *)str;
+            }
+        }
+
+        str++;
+    }
+
+    return NULL;
+}
+
+static Vector *get_urls(const URL *current, const char *page)
 {
     Vector *urls = vector_init();
 
+    Vector *needles = vector_init();
+    vector_push_ref(needles, "https://");
+    vector_push_ref(needles, "http://");
+    vector_push_ref(needles, "'/");
+    vector_push_ref(needles, "\"/");
+
     char *start = NULL;
-    while ((start = strstr(page, "https://")) || (start = strstr(page, "http://")))
+    while ((start = find_str(page, needles)))
     {
         char *end = NULL;
 
-        if (start != page)
+        if (start[0] == '"' || start[0] == '\'')
+        {
+            end = strchr(start + 1, start[0]);
+            start++;
+        }
+        else if (start != page)
         {
             char before = *(start - 1);
 
@@ -52,13 +82,43 @@ static Vector *get_urls(const char *page)
 
         size_t len = end - start;
 
-        char *url = calloc(sizeof(char), len + 1);
-        strncpy(url, start, len);
+        char *url = NULL;
+
+        int relative = *start == '.';
+        if (*start == '/')
+        {
+            size_t url_len = len +
+                             strlen(current->protocol) +
+                             strlen(current->host) +
+                             (relative ? (strlen(current->path) + 1) : 0);
+
+            url = (char *)calloc(sizeof(char), url_len + 1);
+            strcat(url, current->protocol);
+            strcat(url, current->host);
+
+            if (relative)
+            {
+                strcat(url, current->path);
+
+                if (current->path[strlen(current->path) - 1] != '/')
+                {
+                    strcat(url, "/");
+                }
+            }
+        }
+        else
+        {
+            url = (char *)calloc(sizeof(char), len + 1);
+        }
+
+        strncat(url, start, len);
 
         vector_push_ref(urls, url);
 
         page = end;
     }
+
+    vector_free(needles, VECTOR_KEEP_REFERENCE);
 
     return urls;
 }
@@ -122,24 +182,21 @@ static int mkdir_recurse(const char *path, int take_last)
     return 0;
 }
 
-static void save_response(const char *url, const char *buffer, const char *prefix)
+static void save_response(const URL *url, const char *buffer, const char *prefix)
 {
-    URL *parts = url_parse(url);
-
-    char *file_path = (char *)calloc(sizeof(char), strlen(prefix) + 1 + strlen(parts->fullpath) + 1);
+    char *file_path = (char *)calloc(sizeof(char), strlen(prefix) + 1 + strlen(url->fullpath) + 1);
     strcat(file_path, prefix);
     strcat(file_path, "/");
-    strcat(file_path, parts->fullpath);
+    strcat(file_path, url->fullpath);
 
     mkdir_recurse(file_path, 0);
 
-    if (!parallel_file_write(file_path, "w", buffer))
+    if (!parallel_file_write(file_path, "w", "%s", buffer))
     {
         printf("Failed to write the file: '%s' (%s).\n", file_path, strerror(errno));
     }
 
     free(file_path);
-    url_free(parts);
 }
 
 static void crawl_recursive(const char *url, CrawlConfig config, Vector *visited)
@@ -148,38 +205,37 @@ static void crawl_recursive(const char *url, CrawlConfig config, Vector *visited
 
     HttpResponse res = http_get(url);
 
-    if (res.buffer != NULL)
+    if (res.buffer == NULL)
+        return;
+
+    URL *parsed_url = url_parse(url);
+
+    if (config.types == NULL || vector_includes_string_n(config.types, res.content_type, (size_t)(strchr(res.content_type, ';') - res.content_type)))
     {
-        size_t limit = strchr(res.content_type, ';') - res.content_type;
-        if (config.types == NULL || vector_includes_string_n(config.types, res.content_type, limit))
+        save_response(parsed_url, res.buffer, config.storage_directory);
+    }
+
+    vector_push_string(visited, url);
+
+    Vector *urls = get_urls(parsed_url, res.buffer);
+    url_free(parsed_url);
+    free(res.buffer);
+
+    if (config.max_depth > 0)
+    {
+        config.max_depth--;
+
+        for (size_t i = 0; i < urls->length; i++)
         {
-            save_response(url, res.buffer, config.storage_directory);
-        }
-
-        vector_push_string(visited, url);
-
-        if (config.max_depth > 0)
-        {
-            config.max_depth--;
-
-            Vector *urls = get_urls(res.buffer);
-            free(res.buffer);
-
-            for (size_t i = 0; i < urls->length; i++)
+            char *url = vector_get_string(urls, i);
+            if (!url_already_visited(visited, url))
             {
-                char *url = vector_get_string(urls, i);
-
-                if (!url_already_visited(visited, url))
-                {
-                    crawl_recursive(url, config, visited);
-                }
+                crawl_recursive(url, config, visited);
             }
         }
-        else
-        {
-            free(res.buffer);
-        }
     }
+
+    vector_free(urls, VECTOR_KEEP_REFERENCE);
 }
 
 Vector *crawl(const char *url, CrawlConfig config)

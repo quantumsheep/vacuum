@@ -57,3 +57,4 @@ dkms.conf
 /crawler
 /data
 /data-*
+.DS_Store
